@@ -45,7 +45,7 @@ public class DetokenizeTokenExtensionsTests
     {
         // Arrange
         var tokenSummary = TestTokenSummary.Valid();
-        
+
         var detokenizedToken = new DetokenizedToken(
             Plaintext: "card|4111111111111111|12|2030|John Doe",
             TokenSummary: tokenSummary

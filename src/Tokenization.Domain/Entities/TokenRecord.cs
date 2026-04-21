@@ -11,8 +11,8 @@ namespace Tokenization.Domain.Entities;
 internal sealed class TokenRecord
 {
     /// <summary>Primary key</summary>
-    public long Id { get; init; }  
-    
+    public long Id { get; init; }
+
     /// <summary>
     /// The surrogate token that replaces the raw payment credential in non-PCI systems.
     /// Safe to share outside the PCI environment.
@@ -51,7 +51,7 @@ internal sealed class TokenRecord
     /// Card brand or APM provider/network (Visa, Mastercard, AlipayCN, etc.).
     /// </summary>
     public string? Network { get; init; }
-    
+
     /// <summary>
     /// JSON or serialized metadata for payment-method-specific fields.
     /// Example: Apple Pay cryptogram, Alipay account reference, bank code for Boleto.
@@ -81,18 +81,18 @@ internal sealed class TokenRecord
     /// Required to ensure tokens cannot be misused across customers.
     /// </summary>
     public required string CustomerId { get; init; }
-        
+
     /// <summary>
     /// Optional reference to the initial transaction that created or credentialed this token.
     /// Required for tenant-initiated transactions (MIT).
     /// </summary>
     public string? InitialTransactionId { get; init; }
-        
+
     /// <summary>
     /// The type of token lifecycle: one-time, stored-credential
     /// </summary>
     public required TokenType TokenType { get; init; }
-    
+
     /// <summary>
     /// Indicates who initiated a stored credential: customer or processor-side merchant.
     /// Used to generate proper stored-credential flags for processors.
@@ -115,17 +115,17 @@ internal sealed class TokenRecord
     /// Useful for enforcing single-use tokens or usage limits.
     /// </summary>
     public int UsageCount { get; set; }
-    
+
     /// <summary>
     /// Whether the token is currently active and available for use.
     /// </summary>
     public bool IsActive { get; set; } = true;
-    
+
     /// <summary>
     /// Timestamp when the token was created.
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-        
+
     /// <summary>
     /// Timestamp when the token was last updated.
     /// </summary>
@@ -136,7 +136,7 @@ internal sealed class TokenRecord
     /// Useful for lifecycle management and cleanup.
     /// </summary>
     public DateTimeOffset? LastUsedAt { get; set; }
-    
+
     /// <summary>
     /// Expiration date of the payment method (if applicable, e.g., for cards).
     /// Stored encrypted in PCI scope.

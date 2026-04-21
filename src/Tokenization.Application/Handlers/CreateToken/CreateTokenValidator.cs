@@ -13,26 +13,26 @@ internal sealed class CreateTokenValidator : AbstractValidator<CreateTokenComman
         RuleFor(cmd => cmd.TenantId)
             .NotEmpty()
             .MaximumLength(128);
-        
+
         RuleFor(cmd => cmd.CustomerId)
             .NotEmpty()
             .MaximumLength(128);
-        
+
         RuleFor(cmd => cmd.PaymentMethodType)
             .NotEmpty()
             .MaximumLength(32)
             .IsEnumName(typeof(PaymentMethodType));
-        
+
         RuleFor(cmd => cmd.TokenType)
             .NotEmpty()
             .MaximumLength(32)
             .IsEnumName(typeof(TokenType));
-        
+
         RuleFor(cmd => cmd.StoredCredentialInitiator)
             .MaximumLength(32)
             .IsEnumName(typeof(StoredCredentialInitiator))
             .When(cmd => !string.IsNullOrEmpty(cmd.StoredCredentialInitiator));
-        
+
         RuleFor(cmd => cmd.StoredCredentialReason)
             .MaximumLength(32)
             .IsEnumName(typeof(StoredCredentialReason))
@@ -41,23 +41,23 @@ internal sealed class CreateTokenValidator : AbstractValidator<CreateTokenComman
         RuleFor(cmd => cmd.Network)
             .MaximumLength(32)
             .When(cmd => !string.IsNullOrEmpty(cmd.Network));
-        
+
         RuleFor(cmd => cmd.Currency)
             .Length(3)
             .When(cmd => !string.IsNullOrEmpty(cmd.Currency));
-        
+
         RuleFor(cmd => cmd.Country)
             .Length(2)
             .When(cmd => !string.IsNullOrEmpty(cmd.Country));
-        
+
         RuleFor(cmd => cmd.ExpiresAt)
             .GreaterThan(DateTimeOffset.Now)
             .When(cmd => cmd.ExpiresAt.HasValue);
-        
+
         RuleFor(cmd => cmd.MaxUses)
             .GreaterThan(0)
             .When(cmd => cmd.MaxUses.HasValue);
-        
+
         RuleFor(cmd => cmd.InitialTransactionId)
             .MaximumLength(128)
             .When(cmd => !string.IsNullOrEmpty(cmd.InitialTransactionId));

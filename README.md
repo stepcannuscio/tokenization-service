@@ -1,5 +1,7 @@
 # Tokenization Service
 
+[![CI](https://github.com/stepcannuscio/tokenization-service/actions/workflows/ci.yml/badge.svg)](https://github.com/stepcannuscio/tokenization-service/actions/workflows/ci.yml)
+
 A portfolio-ready .NET 10 backend that tokenizes payment credentials with tenant isolation, envelope encryption, idempotency, health checks, and a testable layered architecture.
 
 ## What This Is
@@ -45,8 +47,6 @@ The checked-in development example is already configured for:
 - local SQL Server and Redis
 - the in-memory key provider
 - development-only bearer auth so you can call the API immediately
-
-For SQL Server, `Database:TrustServerCertificate` is an optional explicit override. If you already include `TrustServerCertificate=True` in `Database:ConnectionString` for the local compose container, the app now honors that value without requiring a second config flag.
 
 ### 3. Run the API
 

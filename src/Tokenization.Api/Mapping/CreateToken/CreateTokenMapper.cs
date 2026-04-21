@@ -1,7 +1,7 @@
-using Tokenization.Domain.Abstractions;
 using Tokenization.Api.Requests.v1;
 using Tokenization.Api.Responses;
 using Tokenization.Application.Handlers.CreateToken;
+using Tokenization.Domain.Abstractions;
 using Tokenization.Domain.ValueObjects;
 
 namespace Tokenization.Api.Mapping.CreateToken;
@@ -26,10 +26,10 @@ internal class CreateTokenMapper(ITenantContextService tenantContext)
     public CreateTokenCommand MapRequest(CreateTokenRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
-        
+
         // Get the current tenant ID from the authenticated user's context
         var tenantId = _tenantContext.GetCurrentTenantId();
-        
+
         return new CreateTokenCommand
         {
             TenantId = tenantId,

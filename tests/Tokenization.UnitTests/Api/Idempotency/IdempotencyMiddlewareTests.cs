@@ -1,7 +1,7 @@
+using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Moq;
-using System.Text.Json;
 using Tokenization.Api.Idempotency;
 using Tokenization.Api.Idempotency.Config.Options;
 using Tokenization.Tests.Shared.Fixtures;
@@ -27,7 +27,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         var cache = cacheFixture.Cache;
 
         mockOptions.Setup(x => x.Value).Returns(new IdempotencyOptions { TtlSeconds = 600 });
-        
+
         _middleware = new IdempotencyMiddleware(
             _mockNext.Object,
             cache,
@@ -87,12 +87,12 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         // Arrange
         var context = CreateHttpContext("POST", "/api/tokens");
         context.Request.Headers[IdempotencyHeaders.IdempotencyKey] = "test-key-123";
-        
+
         _mockHasher.Setup(x => x.Hash(It.IsAny<string>(), "POST", "/api/tokens", "test-key-123"))
             .Returns(TestCacheKey.New());
 
         _mockNext.Setup(x => x(It.IsAny<HttpContext>()))
-                 .Callback<HttpContext>(ctx => 
+                 .Callback<HttpContext>(ctx =>
                  {
                      _ = ctx;
                      ctx.Response.StatusCode = 200;
@@ -118,7 +118,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         // Arrange
         var context = CreateHttpContext(method, "/api/tokens");
         context.Request.Headers[IdempotencyHeaders.IdempotencyKey] = "test-key-123";
-        
+
         _mockHasher.Setup(x => x.Hash(It.IsAny<string>(), method, "/api/tokens", "test-key-123"))
                    .Returns(TestCacheKey.New());
 
@@ -136,7 +136,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         var context = CreateHttpContext("POST", "/api/tokens");
         context.Request.Headers[IdempotencyHeaders.IdempotencyKey] = "test-key-123";
         const string userId = "user-123";
-        
+
         // Add authenticated user
         var claims = new List<System.Security.Claims.Claim>
         {
@@ -145,7 +145,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         var identity = new System.Security.Claims.ClaimsIdentity(claims, "test");
         context.User = new System.Security.Claims.ClaimsPrincipal(identity);
 
-        
+
         _mockHasher.Setup(x => x.Hash(userId, "POST", "/api/tokens", "test-key-123"))
                    .Returns(TestCacheKey.New());
 
@@ -162,14 +162,14 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         // Arrange
         var context = CreateHttpContext("POST", "/api/tokens");
         context.Request.Headers[IdempotencyHeaders.IdempotencyKey] = "test-key-123";
-        
+
         var cacheKey = TestCacheKey.New();
         _mockHasher.Setup(x => x.Hash(It.IsAny<string>(), "POST", "/api/tokens", "test-key-123"))
                    .Returns(cacheKey);
 
         // First request to cache the response
         _mockNext.Setup(x => x(It.IsAny<HttpContext>()))
-                 .Callback<HttpContext>(ctx => 
+                 .Callback<HttpContext>(ctx =>
                  {
                      ctx.Response.StatusCode = 201;
                      ctx.Response.Headers["Content-Type"] = "application/json";
@@ -200,7 +200,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         // Arrange
         var context = CreateHttpContext("POST", "/api/tokens");
         context.Request.Headers[IdempotencyHeaders.IdempotencyKey] = "test-key-123";
-        
+
         var cacheKey = TestCacheKey.New();
         _mockHasher.Setup(x => x.Hash(It.IsAny<string>(), "POST", "/api/tokens", "test-key-123"))
                    .Returns(cacheKey);
@@ -225,7 +225,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         // Arrange
         var context = CreateHttpContext("POST", "/api/tokens");
         context.Request.Headers[IdempotencyHeaders.IdempotencyKey] = "test-key-123";
-        
+
         var cacheKey = TestCacheKey.New();
         _mockHasher.Setup(x => x.Hash(It.IsAny<string>(), "POST", "/api/tokens", "test-key-123"))
                    .Returns(cacheKey);
@@ -234,7 +234,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         var responseJson = JsonSerializer.Serialize(responseData);
 
         _mockNext.Setup(x => x(It.IsAny<HttpContext>()))
-                 .Callback<HttpContext>(ctx => 
+                 .Callback<HttpContext>(ctx =>
                  {
                      ctx.Response.StatusCode = 201;
                      ctx.Response.Headers["Location"] = "/tokens/456";
@@ -256,13 +256,13 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         // Arrange
         var context = CreateHttpContext("POST", "/api/tokens");
         context.Request.Headers[IdempotencyHeaders.IdempotencyKey] = "test-key-123";
-        
+
         var cacheKey = TestCacheKey.New();
         _mockHasher.Setup(x => x.Hash(It.IsAny<string>(), "POST", "/api/tokens", "test-key-123"))
                    .Returns(cacheKey);
 
         _mockNext.Setup(x => x(It.IsAny<HttpContext>()))
-                 .Callback<HttpContext>(ctx => 
+                 .Callback<HttpContext>(ctx =>
                  {
                      ctx.Response.StatusCode = 422; // Unprocessable Entity
                      ctx.Response.WriteAsync("validation error");
@@ -284,7 +284,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         var context2 = CreateHttpContext("POST", "/api/tokens");
         context1.Request.Headers[IdempotencyHeaders.IdempotencyKey] = "test-key-123";
         context2.Request.Headers[IdempotencyHeaders.IdempotencyKey] = "test-key-123";
-        
+
         var cacheKey = TestCacheKey.New();
         _mockHasher.Setup(x => x.Hash(It.IsAny<string>(), "POST", "/api/tokens", "test-key-123"))
                    .Returns(cacheKey);
@@ -293,7 +293,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         var responseJson = JsonSerializer.Serialize(responseData);
 
         _mockNext.Setup(x => x(It.IsAny<HttpContext>()))
-                 .Callback<HttpContext>(ctx => 
+                 .Callback<HttpContext>(ctx =>
                  {
                      ctx.Response.StatusCode = 201;
                      ctx.Response.WriteAsync(responseJson);
@@ -305,7 +305,7 @@ public sealed class IdempotencyMiddlewareTests : IClassFixture<HybridCacheFixtur
         // Reset the mock to verify it's not called again
         _mockNext.Reset();
         _mockNext.Setup(x => x(It.IsAny<HttpContext>()))
-                 .Callback<HttpContext>(ctx => 
+                 .Callback<HttpContext>(ctx =>
                  {
                      ctx.Response.StatusCode = 201;
                      ctx.Response.WriteAsync(responseJson);

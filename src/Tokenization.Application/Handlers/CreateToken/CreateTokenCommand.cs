@@ -16,13 +16,13 @@ internal sealed class CreateTokenCommand : IRequest<TokenSummary>
 
     /// <summary>Payment method type (e.g., Card, ApplePay).</summary>
     public string PaymentMethodType { get; set; } = null!;
-    
+
     /// <summary>Token type (e.g., OneTime, StoredCredential).</summary>
     public string TokenType { get; set; } = null!;
-    
+
     /// <summary>Identifies who initiated the use of a stored credential (e.g., Customer, Merchant).</summary>
     public string? StoredCredentialInitiator { get; set; }
-        
+
     /// <summary>Identifies the reason for the stored credential (e.g., Recurring, Installments).</summary>
     public string? StoredCredentialReason { get; set; }
 
@@ -43,7 +43,7 @@ internal sealed class CreateTokenCommand : IRequest<TokenSummary>
 
     /// <summary>Initial transaction id (optional; stored for audit/COF frameworks).</summary>
     public string? InitialTransactionId { get; set; }
-    
+
     /// <summary>Plaintext card input. Never log or echo these fields.</summary>
     public CardPlaintext? Card { get; set; }
 }

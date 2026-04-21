@@ -23,7 +23,7 @@ internal sealed partial class CacheKeyGenerator : ICacheKeyGenerator
     private const int MaxKeyPartLength = 100;
     private const char KeySeparator = '/';
     private const char VersionSeparator = ':';
-    
+
     // Regex pattern for safe cache key characters: alphanumeric, hyphens, underscores, dots, colons, and forward slashes
     // This pattern allows: a-z, A-Z, 0-9, -, _, ., :, /
     private static readonly Regex SafeCharacterPattern = SafeCharacterRegex();
@@ -35,10 +35,10 @@ internal sealed partial class CacheKeyGenerator : ICacheKeyGenerator
         ValidateKeyParts(keyParts);
 
         var keyBuilder = new StringBuilder();
-        
+
         // Add namespace
         keyBuilder.Append(@namespace);
-        
+
         // Add key parts
         foreach (var part in keyParts)
         {
@@ -48,7 +48,7 @@ internal sealed partial class CacheKeyGenerator : ICacheKeyGenerator
 
         var result = keyBuilder.ToString();
         ValidateFinalKey(result);
-        
+
         return result;
     }
 
@@ -60,14 +60,14 @@ internal sealed partial class CacheKeyGenerator : ICacheKeyGenerator
         ValidateKeyParts(keyParts);
 
         var keyBuilder = new StringBuilder();
-        
+
         // Add namespace
         keyBuilder.Append(@namespace);
-        
+
         // Add version
         keyBuilder.Append(VersionSeparator);
         keyBuilder.Append(SanitizeForCacheKey(version));
-        
+
         // Add key parts
         foreach (var part in keyParts)
         {
@@ -77,7 +77,7 @@ internal sealed partial class CacheKeyGenerator : ICacheKeyGenerator
 
         var result = keyBuilder.ToString();
         ValidateFinalKey(result);
-        
+
         return result;
     }
 
@@ -101,7 +101,7 @@ internal sealed partial class CacheKeyGenerator : ICacheKeyGenerator
             return "empty";
 
         var sanitized = new StringBuilder();
-        
+
         foreach (var character in input)
         {
             // Check if character matches the safe pattern (single character)
@@ -126,7 +126,7 @@ internal sealed partial class CacheKeyGenerator : ICacheKeyGenerator
         }
 
         var result = sanitized.ToString();
-        
+
         // Truncate if too long
         if (result.Length > MaxKeyPartLength)
         {

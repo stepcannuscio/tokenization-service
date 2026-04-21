@@ -32,7 +32,7 @@ internal sealed class BulkOperationsService(TokensDbContext dbContext, ILogger<B
             return 0;
         }
 
-        logger.LogInformation("Starting bulk insert of {Count} entities in batches of {BatchSize}", 
+        logger.LogInformation("Starting bulk insert of {Count} entities in batches of {BatchSize}",
             entityList.Count, batchSize);
 
         var totalInserted = 0;
@@ -44,17 +44,17 @@ internal sealed class BulkOperationsService(TokensDbContext dbContext, ILogger<B
             for (var i = 0; i < entityList.Count; i += batchSize)
             {
                 var batch = entityList.Skip(i).Take(batchSize).ToList();
-                
+
                 await dbContext.Set<T>().AddRangeAsync(batch, cancellationToken);
                 var inserted = await dbContext.SaveChangesAsync(cancellationToken);
                 totalInserted += inserted;
 
-                logger.LogDebug("Inserted batch {BatchNumber} with {InsertedCount} entities", 
+                logger.LogDebug("Inserted batch {BatchNumber} with {InsertedCount} entities",
                     i / batchSize + 1, inserted);
             }
 
             stopwatch.Stop();
-            logger.LogInformation("Bulk insert completed: {TotalInserted} entities in {ElapsedMs}ms", 
+            logger.LogInformation("Bulk insert completed: {TotalInserted} entities in {ElapsedMs}ms",
                 totalInserted, stopwatch.ElapsedMilliseconds);
 
             return totalInserted;
@@ -93,7 +93,7 @@ internal sealed class BulkOperationsService(TokensDbContext dbContext, ILogger<B
                 updateExpression, parameters, cancellationToken);
 
             stopwatch.Stop();
-            logger.LogInformation("Bulk update completed: {AffectedRows} rows affected in {ElapsedMs}ms", 
+            logger.LogInformation("Bulk update completed: {AffectedRows} rows affected in {ElapsedMs}ms",
                 affectedRows, stopwatch.ElapsedMilliseconds);
 
             return affectedRows;
@@ -131,7 +131,7 @@ internal sealed class BulkOperationsService(TokensDbContext dbContext, ILogger<B
                 deleteExpression, parameters, cancellationToken);
 
             stopwatch.Stop();
-            logger.LogInformation("Bulk delete completed: {AffectedRows} rows affected in {ElapsedMs}ms", 
+            logger.LogInformation("Bulk delete completed: {AffectedRows} rows affected in {ElapsedMs}ms",
                 affectedRows, stopwatch.ElapsedMilliseconds);
 
             return affectedRows;

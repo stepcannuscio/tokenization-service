@@ -1,6 +1,6 @@
-using FluentAssertions;
 using System.Security.Cryptography;
 using System.Text;
+using FluentAssertions;
 using Tokenization.Api.Idempotency;
 using Xunit;
 
@@ -52,10 +52,10 @@ public sealed class DefaultIdempotencyKeyHasherTests
     [InlineData("user-123", "user-123", "POST", "POST", "/api/tokens", "/api/payments", "test-key-123", "test-key-123", "Different paths")]
     [InlineData("user-123", "user-123", "POST", "POST", "/api/tokens", "/api/tokens", "test-key-123", "test-key-456", "Different idempotency keys")]
     public void Hash_WithDifferentInputs_ShouldReturnDifferentHashes(
-        string partition1, string partition2, 
-        string method1, string method2, 
-        string path1, string path2, 
-        string key1, string key2, 
+        string partition1, string partition2,
+        string method1, string method2,
+        string path1, string path2,
+        string key1, string key2,
         string description)
     {
         // Act
@@ -83,7 +83,7 @@ public sealed class DefaultIdempotencyKeyHasherTests
         var expectedInput = $"{partition}\n{method}\n{path}\n{idempotencyKey}";
         var expectedHash = SHA256.HashData(Encoding.UTF8.GetBytes(expectedInput));
         var expectedResult = $"idem:{Convert.ToHexString(expectedHash)}";
-        
+
         result.Should().Be(expectedResult);
     }
 

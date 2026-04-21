@@ -15,7 +15,7 @@ internal static class CreateTokenMapper
     public static CreateTokenArgs ToCreateTokenArgs(this CreateTokenCommand cmd)
     {
         ArgumentNullException.ThrowIfNull(cmd);
-        
+
         // Normalize & create masked display like "************1234"
         var pan = cmd.Card?.Pan.Trim() ?? string.Empty;
         var last4 = pan.Length >= 4 ? pan[^4..] : pan;
@@ -42,13 +42,13 @@ internal static class CreateTokenMapper
             StoredCredentialReason: TryGetEnumValue<StoredCredentialReason>(cmd.StoredCredentialReason),
             ExpiresAt: cmd.ExpiresAt);
     }
-    
+
     /// <summary>Maps a <see cref="CreateTokenCommand"/> into a minimal plaintext blob for the domain to encrypt.</summary>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="cmd"/> is <c>null</c>.</exception>
     public static ReadOnlyMemory<byte> ToSensitivePayload(this CreateTokenCommand cmd)
     {
         ArgumentNullException.ThrowIfNull(cmd);
-        
+
         // Simple normalized pipe format
         var normalized = string.Join("|", "card", cmd.Card?.Pan,
             cmd.Card?.ExpMonth.ToString("00", CultureInfo.InvariantCulture),
@@ -57,7 +57,7 @@ internal static class CreateTokenMapper
 
         return System.Text.Encoding.UTF8.GetBytes(normalized);
     }
-  
+
     private static TEnum? TryGetEnumValue<TEnum>(string? value) where TEnum : struct
     {
         if (value is null) return null;
@@ -65,7 +65,7 @@ internal static class CreateTokenMapper
             ? result
             : null;
     }
-    
+
     private static TEnum GetEnumValue<TEnum>(string value) where TEnum : struct
     {
         return Enum.Parse<TEnum>(value, ignoreCase: true);

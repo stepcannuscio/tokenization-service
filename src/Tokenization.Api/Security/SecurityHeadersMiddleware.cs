@@ -13,20 +13,19 @@ internal sealed class SecurityHeadersMiddleware(RequestDelegate next)
 
     private static void AddSecurityHeaders(HttpResponse response)
     {
-        // Content Security Policy
+        // Content Security Policy — 'unsafe-inline' is required for Swagger UI script and style injection
         response.Headers.ContentSecurityPolicy = "default-src 'self'; " +
-                                                 "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                                                 "script-src 'self' 'unsafe-inline'; " +
                                                  "style-src 'self' 'unsafe-inline'; " +
                                                  "img-src 'self' data: https:; " +
                                                  "font-src 'self' data:; " +
                                                  "connect-src 'self'; " +
                                                  "frame-ancestors 'none';";
-        
+
         // Prevent MIME type sniffing
         response.Headers.XContentTypeOptions = "nosniff";
 
-        // Enable XSS protection
-        response.Headers.XXSSProtection = "1; mode=block";
+        // X-XSS-Protection intentionally omitted — deprecated and superseded by the CSP above
 
         // Prevent clickjacking
         response.Headers.XFrameOptions = "DENY";

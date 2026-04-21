@@ -17,7 +17,7 @@ internal static class DependencyInjection
         services.Configure<IdempotencyOptions>(configuration.GetSection(IdempotencyOptions.SectionName));
         services.AddSingleton<IIdempotencyKeyHasher, DefaultIdempotencyKeyHasher>();
     }
-        
+
     /// <summary>
     /// Configures idempotency middleware.
     /// </summary>

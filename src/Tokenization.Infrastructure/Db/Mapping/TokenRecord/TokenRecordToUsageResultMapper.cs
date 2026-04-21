@@ -17,7 +17,7 @@ internal sealed class TokenRecordToUsageResultMapper
     public static TokenUsageResult Map(Domain.Entities.TokenRecord source)
     {
         ArgumentNullException.ThrowIfNull(source);
-        
+
         return new TokenUsageResult(
             Token: source.Token,
             UsageCount: source.UsageCount,

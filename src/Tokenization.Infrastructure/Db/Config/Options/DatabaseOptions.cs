@@ -94,7 +94,7 @@ internal sealed class DatabaseOptions
     /// </summary>
     [Range(100, 5000)]
     public int SlowQueryThresholdMs { get; set; } = 1000;
-    
+
     /// <summary>
     /// Optional override for SQL Server certificate trust behavior.
     /// When unset, any value already present in the connection string is preserved.

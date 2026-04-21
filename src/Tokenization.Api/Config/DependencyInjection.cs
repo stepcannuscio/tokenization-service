@@ -1,10 +1,10 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
-using Tokenization.Api.Config.Options;
 using Tokenization.Api.Authentication.Development;
+using Tokenization.Api.Config.Options;
 using Tokenization.Infrastructure.Authorization;
 
 namespace Tokenization.Api.Config;
@@ -114,13 +114,13 @@ internal static class DependencyInjection
     {
         var securityOptions = configuration.GetSection(SecurityOptions.SectionName).Get<SecurityOptions>() ??
                               new SecurityOptions();
-        
+
         services.AddHttpsRedirection(o => o.HttpsPort = securityOptions.HttpsPort);
         services.AddHsts(o =>
         {
             o.MaxAge = TimeSpan.FromDays(securityOptions.HstsMaxAgeDays);
         });
-        
+
         services.AddAntiforgery();
     }
 

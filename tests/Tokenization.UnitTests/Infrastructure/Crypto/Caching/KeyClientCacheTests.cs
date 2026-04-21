@@ -23,7 +23,7 @@ public class KeyClientCacheTests : IClassFixture<HybridCacheFixtureInMemory>
     {
         var result = await _cache.GetAllClientsAsync(TestCacheKey.New());
 
-        result.Should().BeEquivalentTo((IReadOnlyList<TestKeyClient>) []);
+        result.Should().BeEquivalentTo((IReadOnlyList<TestKeyClient>)[]);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class KeyClientCacheTests : IClassFixture<HybridCacheFixtureInMemory>
         var key = TestCacheKey.New();
         if (key.Length > 100) key = key[..100];
 
-        await _cache.SetClientsAsync(key, [c1, c2, c3 ]);
+        await _cache.SetClientsAsync(key, [c1, c2, c3]);
 
         var all = await _cache.GetAllClientsAsync(key);
         all.Should().NotBeNull();

@@ -22,11 +22,11 @@ internal static class ApiVersioningPolicies
                 new HeaderApiVersionReader(VersioningParams.Header),
                 new QueryStringApiVersionReader(VersioningParams.Query)
             ),
-            
+
             // Assume version 1.0 if no version is specified
             AssumeDefaultVersionWhenUnspecified = true,
             DefaultApiVersion = new ApiVersion(1, 0),
-            
+
             // Report API versions in response headers
             ReportApiVersions = true
         };

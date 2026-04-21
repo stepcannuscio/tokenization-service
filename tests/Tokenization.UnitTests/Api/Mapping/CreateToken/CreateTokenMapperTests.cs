@@ -1,8 +1,8 @@
 using FluentAssertions;
-using Tokenization.Domain.Abstractions;
 using Moq;
 using Tokenization.Api.Mapping.CreateToken;
 using Tokenization.Api.Requests.v1;
+using Tokenization.Domain.Abstractions;
 using Tokenization.Domain.ValueObjects;
 using Tokenization.Tests.Shared.Utils.Requests;
 using Tokenization.Tests.Shared.Utils.ValueObjects;
@@ -196,7 +196,7 @@ public class CreateTokenMapperTests
         // Assert
         command.StoredCredentialInitiator.Should().Be(initiator);
     }
-    
+
     [Theory]
     [InlineData("Recurring")]
     [InlineData("Unscheduled")]

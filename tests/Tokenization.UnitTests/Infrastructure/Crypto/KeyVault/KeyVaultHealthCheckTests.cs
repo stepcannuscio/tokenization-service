@@ -14,7 +14,7 @@ namespace Tokenization.Tests.Unit.Infrastructure.Crypto.KeyVault;
 public class KeyVaultHealthCheckTests
 {
     private readonly Mock<ILogger<KeyVaultHealthCheck>> _mockLogger = new();
-    
+
     private static Mock<IOptions<KeyStorageOptions>> ValidOptionsMock(int? healthCheckTimeoutSeconds = null)
     {
         var optionsMock = new Mock<IOptions<KeyStorageOptions>>();
@@ -58,7 +58,7 @@ public class KeyVaultHealthCheckTests
         var mockKeyProvider = TestKeyProvider.ValidMock();
         mockKeyProvider.Setup(kp => kp.PreloadKeysAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new HttpRequestException("Key Vault unreachable"));
-        
+
         var healthCheck = new KeyVaultHealthCheck(
             TestKeyClient.ValidMock().Object,
             mockKeyProvider.Object,
@@ -72,8 +72,8 @@ public class KeyVaultHealthCheckTests
         result.Status.Should().Be(HealthStatus.Unhealthy);
         result.Description.Should().Contain("Key Vault");
     }
-    
-               
+
+
     [Fact]
     public async Task KeyVaultHealthCheck_WithSlowResponseTime_ShouldReturnDegraded()
     {
@@ -86,7 +86,7 @@ public class KeyVaultHealthCheckTests
             });
 
         var mockOptions = ValidOptionsMock(healthCheckTimeoutSeconds: 0);
-        
+
         var healthCheck = new KeyVaultHealthCheck(
             TestKeyClient.ValidMock().Object,
             mockKeyProvider.Object,

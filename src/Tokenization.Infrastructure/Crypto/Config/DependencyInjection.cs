@@ -41,15 +41,15 @@ internal static class DependencyInjection
         switch (keyStorageOptions?.KeyProvider)
         {
             case KeyProviderType.InMemory:
-            {
-                services.AddInMemoryInfra();
-                break;
-            }
+                {
+                    services.AddInMemoryInfra();
+                    break;
+                }
             case KeyProviderType.AzureKeyVault:
-            {
-                services.AddKeyVaultInfra();
-                break;
-            }
+                {
+                    services.AddKeyVaultInfra();
+                    break;
+                }
             default:
                 throw new InvalidOperationException("Key provider type is invalid");
         }

@@ -22,9 +22,9 @@ internal class GetTokenMapper
     public GetTokenCommand MapRequest(GetTokenRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
-        
+
         return new GetTokenCommand
-        { 
+        {
             Token = request.Token
         };
     }
@@ -38,7 +38,7 @@ internal class GetTokenMapper
     public GetTokenResponse MapResponse(TokenSummary summary)
     {
         ArgumentNullException.ThrowIfNull(summary);
-        
+
         return new GetTokenResponse
         {
             Token = summary.Token,

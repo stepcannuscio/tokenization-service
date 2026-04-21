@@ -68,7 +68,7 @@ internal interface IKeyProvider
     /// <param name="keyName">Logical key name (e.g., "payment-kek") used to select the key client.</param>
     /// <param name="ct">Cancellation token.</param>
     Task PreloadKeysAsync(string keyName, CancellationToken ct = default);
-    
+
     /// <summary>
     /// Signs data using an active HSM key. Implementations should first attempt to sign data using the current key and
     /// fallback to other known active versions if needed.

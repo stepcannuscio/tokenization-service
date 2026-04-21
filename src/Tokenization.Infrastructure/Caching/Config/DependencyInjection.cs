@@ -17,7 +17,7 @@ internal static class DependencyInjection
     public static void AddCachingInfra(this IServiceCollection services, IConfiguration configuration)
     {
         var cacheOptions = configuration.GetSection(CacheOptions.SectionName).Get<CacheOptions>() ?? new CacheOptions();
-        
+
         if (!string.IsNullOrEmpty(cacheOptions.RedisConnectionString))
         {
             services.AddStackExchangeRedisCache(options =>
@@ -35,7 +35,7 @@ internal static class DependencyInjection
         }
 
         services.AddHybridCache();
-        
+
         services.AddSingleton<ICacheKeyGenerator, CacheKeyGenerator>();
     }
 }

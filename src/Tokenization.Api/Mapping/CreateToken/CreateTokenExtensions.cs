@@ -1,7 +1,7 @@
-using Tokenization.Domain.Abstractions;
 using Tokenization.Api.Requests.v1;
 using Tokenization.Api.Responses;
 using Tokenization.Application.Handlers.CreateToken;
+using Tokenization.Domain.Abstractions;
 using Tokenization.Domain.ValueObjects;
 
 namespace Tokenization.Api.Mapping.CreateToken;
@@ -24,7 +24,7 @@ internal static class CreateTokenExtensions
     {
         return new CreateTokenMapper(tenantContextService).MapRequest(request);
     }
-    
+
     /// <summary>
     /// Converts a TokenDto to a CreateTokenResponse using the CreateTokenMapper.
     /// </summary>

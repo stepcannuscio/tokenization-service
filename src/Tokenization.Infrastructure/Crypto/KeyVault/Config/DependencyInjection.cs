@@ -42,7 +42,7 @@ internal static class DependencyInjection
             var credential = sp.GetRequiredService<TokenCredential>();
             return new KeyVaultKeyMetadataFactory(credential);
         });
-        
+
         services.AddKeyedSingleton<IKeyProvider, KeyVaultProvider>(KeyProviderType.AzureKeyVault, (sp, _) =>
         {
             var keyClient = sp.GetRequiredService<KeyClient>();
@@ -53,7 +53,7 @@ internal static class DependencyInjection
 
         return services;
     }
-    
+
     /// <summary>
     /// Adds KeyVault health checks to the service collection.
     /// </summary>
@@ -66,7 +66,7 @@ internal static class DependencyInjection
                 "keyvault",
                 failureStatus: HealthStatus.Unhealthy,
                 tags: ["keyvault", "azure", "crypto", "infrastructure"]);
-        
+
         return services;
     }
 }

@@ -1,7 +1,5 @@
 using Asp.Versioning;
 using MediatR;
-using Tokenization.Domain.Abstractions;
-using Tokenization.Infrastructure.Authorization.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -12,6 +10,8 @@ using Tokenization.Api.Mapping.DetokenizeToken;
 using Tokenization.Api.Mapping.GetToken;
 using Tokenization.Api.Requests.v1;
 using Tokenization.Api.Responses;
+using Tokenization.Domain.Abstractions;
+using Tokenization.Infrastructure.Authorization.Attributes;
 
 namespace Tokenization.Api.Controllers;
 
@@ -93,7 +93,7 @@ public sealed class TokensController(
             new { version, tokenId = response.Token },
             response);
     }
-    
+
     /// <summary>
     /// Deletes a token.
     /// </summary>
@@ -114,7 +114,7 @@ public sealed class TokensController(
 
         return result ? NoContent() : NotFound();
     }
-    
+
     /// <summary>
     /// Detokenizes a token to plaintext payment data.
     /// </summary>

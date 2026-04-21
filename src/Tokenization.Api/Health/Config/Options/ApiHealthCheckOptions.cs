@@ -16,7 +16,7 @@ internal sealed class ApiHealthCheckOptions
     /// Enable health checks for API connectivity.
     /// </summary>
     public bool Enabled { get; set; } = true;
-    
+
     /// <summary>
     /// Health check timeout in seconds.
     /// </summary>

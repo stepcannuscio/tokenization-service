@@ -1,7 +1,7 @@
-using FluentAssertions;
-using Moq;
 using System.Security.Cryptography;
 using System.Text;
+using FluentAssertions;
+using Moq;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Domain.ValueObjects;
 using Tokenization.Infrastructure.Crypto.Services;
@@ -31,7 +31,7 @@ public class EncryptionServiceTests
 
         var keyProvider = new Mock<IKeyProvider>(MockBehavior.Strict);
         keyProvider
-            .Setup(k => k.WrapKeyAsync(It.IsAny<byte[]>(), It.IsAny<string>(),It.IsAny<CancellationToken>()))
+            .Setup(k => k.WrapKeyAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Callback<byte[], string, CancellationToken>((dek, _, _) => wrapCalledWithDek = dek)
             .ReturnsAsync(returnedWrap);
 
@@ -43,7 +43,7 @@ public class EncryptionServiceTests
         result.Tag.Should().HaveCount(TagSize);
         result.Ciphertext.Should().HaveCount(Encoding.UTF8.GetByteCount(plaintext));
         result.WrapPayload.Should().BeSameAs(returnedWrap);
-        keyProvider.Verify(k => k.WrapKeyAsync(It.IsAny<byte[]>(), It.IsAny<string>(),It.IsAny<CancellationToken>()), Times.Once);
+        keyProvider.Verify(k => k.WrapKeyAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Once);
         wrapCalledWithDek.Should().NotBeNull();
     }
 

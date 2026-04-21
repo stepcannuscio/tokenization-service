@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Security;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
 using Tokenization.Domain.Exceptions;
 
 namespace Tokenization.Api.ExceptionHandling.Config;
@@ -19,7 +19,7 @@ internal static partial class DependencyInjection
     public static void UseTokenizationExceptionHandling(this WebApplication app)
     {
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
-        
+
         app.UseExceptionHandler(errorApp =>
         {
             errorApp.Run(async context =>
@@ -41,7 +41,7 @@ internal static partial class DependencyInjection
                     Type = GetProblemType(status),
                     Instance = context.Request.Path
                 };
-                
+
                 context.Response.StatusCode = status;
                 context.Response.ContentType = "application/problem+json";
                 await context.Response.WriteAsJsonAsync(problem);
@@ -206,19 +206,19 @@ internal static partial class DependencyInjection
 
     [GeneratedRegex("'([^']{8,})'")]
     private static partial Regex SensitivePattern1();
-    
+
     [GeneratedRegex(@"\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b")]
     private static partial Regex SensitivePattern2();
-    
+
     [GeneratedRegex(@"\b\d{13,19}\b")]
     private static partial Regex SensitivePattern3();
-    
+
     [GeneratedRegex(@"password[=:]\s*\S+", RegexOptions.IgnoreCase, "en-US")]
     private static partial Regex SensitivePattern4();
-    
+
     [GeneratedRegex(@"key[=:]\s*\S+", RegexOptions.IgnoreCase, "en-US")]
     private static partial Regex SensitivePattern5();
-    
+
     [GeneratedRegex(@"token[=:]\s*\S+", RegexOptions.IgnoreCase, "en-US")]
     private static partial Regex SensitivePattern6();
 }

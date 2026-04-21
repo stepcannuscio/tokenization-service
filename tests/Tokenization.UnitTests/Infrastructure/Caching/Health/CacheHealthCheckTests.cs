@@ -12,7 +12,7 @@ namespace Tokenization.Tests.Unit.Infrastructure.Caching.Health;
 public class CacheHealthCheckTests(HybridCacheFixtureInMemory fixture) : IClassFixture<HybridCacheFixtureInMemory>
 {
     // Slow, !=
-    
+
     private readonly Mock<ILogger<CacheHealthCheck>> _mockLogger = new();
 
     private static Mock<IOptions<CacheOptions>> ValidOptionsMock(int? healthCheckTimeoutSeconds = null)
@@ -23,9 +23,9 @@ public class CacheHealthCheckTests(HybridCacheFixtureInMemory fixture) : IClassF
         optionsMock.Setup(x => x.Value).Returns(options);
         return optionsMock;
     }
-    
+
     [Fact]
-    public async Task  CacheHealthCheck_WithValidCache_ShouldReturnHealthy()
+    public async Task CacheHealthCheck_WithValidCache_ShouldReturnHealthy()
     {
         // Arrange
         var healthCheck = new CacheHealthCheck(fixture.Cache, _mockLogger.Object, ValidOptionsMock().Object);
@@ -46,7 +46,7 @@ public class CacheHealthCheckTests(HybridCacheFixtureInMemory fixture) : IClassF
         // Arrange
         fixture.SetInvalidCache();
         var healthCheck = new CacheHealthCheck(fixture.Cache, _mockLogger.Object, ValidOptionsMock().Object);
-        
+
         // Act
         var result = await healthCheck.CheckHealthAsync(new HealthCheckContext());
         fixture.SetValidCache();

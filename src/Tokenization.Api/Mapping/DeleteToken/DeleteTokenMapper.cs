@@ -19,7 +19,7 @@ internal class DeleteTokenMapper : IRequestMapper<DeleteTokenRequest, DeleteToke
     public DeleteTokenCommand MapRequest(DeleteTokenRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
-        
+
         return new DeleteTokenCommand
         {
             Token = request.Token

@@ -9,7 +9,7 @@ namespace Tokenization.Infrastructure.Db.BlindIndex;
 internal sealed class BlindIndexService(IKeyProvider keyProvider, string keyName) : IBlindIndexService
 {
     private const int HashLength = 32;
-    
+
     /// <inheritdoc />
     public async Task<byte[]> ComputeAsync(string value, string? keyId, CancellationToken ct = default)
     {
@@ -17,7 +17,7 @@ internal sealed class BlindIndexService(IKeyProvider keyProvider, string keyName
 
         var data = Encoding.UTF8.GetBytes(value);
         var hash = await keyProvider.SignDataAsync(data, keyName, keyId, ct);
-        
+
         // Ensure we have exactly 32 bytes
         if (hash.Length == HashLength)
             return hash;

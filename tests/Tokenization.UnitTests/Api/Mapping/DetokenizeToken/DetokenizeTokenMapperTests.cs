@@ -64,7 +64,7 @@ public class DetokenizeTokenMapperTests
             LastUsedAt: null,
             ExpiresAt: DateTimeOffset.UtcNow.AddDays(30)
         );
-        
+
         var detokenizedToken = new DetokenizedToken(
             Plaintext: "card|4111111111111111|12|2030|John Doe",
             TokenSummary: tokenSummary
@@ -122,7 +122,7 @@ public class DetokenizeTokenMapperTests
             LastUsedAt: null,
             ExpiresAt: DateTimeOffset.UtcNow.AddDays(30)
         );
-        
+
         var detokenizedToken = new DetokenizedToken(plaintext, tokenSummary);
 
         // Act

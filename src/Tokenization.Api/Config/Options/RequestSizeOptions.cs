@@ -9,7 +9,7 @@ internal sealed class RequestSizeOptions
     /// Configuration section name.
     /// </summary>
     public const string SectionName = "RequestSize";
-    
+
     /// <summary>
     /// Maximum request body size in bytes. Default is 32KB for payment APIs.
     /// </summary>

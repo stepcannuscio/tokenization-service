@@ -1,5 +1,5 @@
-using FluentAssertions;
 using System.Security.Claims;
+using FluentAssertions;
 using Tokenization.Api.Authorization;
 using Xunit;
 
@@ -159,7 +159,7 @@ public class AuthorizationHandlerTests
     {
         var claims = scopes.Select(scope => new Claim("scope", scope)).ToList();
         claims.Add(new Claim(ClaimTypes.Name, "test-user"));
-        
+
         var identity = new ClaimsIdentity(claims, "test");
         return new ClaimsPrincipal(identity);
     }
@@ -168,7 +168,7 @@ public class AuthorizationHandlerTests
     {
         var claims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
         claims.Add(new Claim(ClaimTypes.Name, "test-user"));
-        
+
         var identity = new ClaimsIdentity(claims, "test");
         return new ClaimsPrincipal(identity);
     }
@@ -180,7 +180,7 @@ public class AuthorizationHandlerTests
             new("scope", scopes),
             new(ClaimTypes.Name, "test-user")
         };
-        
+
         var identity = new ClaimsIdentity(claims, "test");
         return new ClaimsPrincipal(identity);
     }

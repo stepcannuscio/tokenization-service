@@ -1,7 +1,7 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Reflection;
 
 namespace Tokenization.Api.OpenApi.Filters;
 

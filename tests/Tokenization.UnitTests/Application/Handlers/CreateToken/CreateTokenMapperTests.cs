@@ -1,6 +1,6 @@
-using FluentAssertions;
 using System.Text;
 using System.Text.RegularExpressions;
+using FluentAssertions;
 using Tokenization.Application.Handlers.CreateToken;
 using Tokenization.Domain.Enums;
 using Tokenization.Domain.ValueObjects;

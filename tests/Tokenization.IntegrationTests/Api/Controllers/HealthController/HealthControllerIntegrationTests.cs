@@ -1,6 +1,6 @@
-using FluentAssertions;
 using System.Net;
 using System.Text.Json;
+using FluentAssertions;
 using Tokenization.Api.Health;
 using Tokenization.Tests.Shared.Fixtures;
 using Xunit;
@@ -57,7 +57,7 @@ public class HealthControllerIntegrationTests(WebApplicationFactoryFixture facto
             check.Status.Should().NotBeNullOrEmpty();
             check.Duration.Should().BeGreaterThanOrEqualTo(0);
         }
-        
+
         // Verify all expected health checks are included.
         var expectedHealthCheckNames = new List<string>
         {
@@ -67,7 +67,7 @@ public class HealthControllerIntegrationTests(WebApplicationFactoryFixture facto
         healthResponse.Checks.Select(c => c.Name).Should().Contain(expectedHealthCheckNames);
         healthResponse.Checks.Select(c => c.Name).Should().OnlyContain(name => expectedHealthCheckNames.Contains(name));
     }
-    
+
     [Fact]
     public async Task GetHealth_ShouldWorkWithoutAuthentication()
     {
@@ -82,7 +82,7 @@ public class HealthControllerIntegrationTests(WebApplicationFactoryFixture facto
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK, content);
     }
-    
+
     [Fact]
     public async Task GetLiveness_ShouldReturn200OK()
     {

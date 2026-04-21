@@ -1,5 +1,5 @@
 namespace Tokenization.Domain.ValueObjects;
-    
+
 /// <summary>
 /// Plaintext card values (PCI data). Keep process-local and never persist CVC.
 /// </summary>

@@ -50,19 +50,19 @@ internal static class DependencyInjection
                 switch (dbOptions.Provider)
                 {
                     case DatabaseProviderType.SqlServer:
-                    {
-                        var connectionString = BuildResilientConnectionString(dbOptions);
-                        options.UseSqlServer(connectionString, sqlOptions =>
                         {
-                            sqlOptions.EnableRetryOnFailure(
-                                maxRetryCount: dbOptions.MaxRetryCount,
-                                maxRetryDelay: TimeSpan.FromSeconds(dbOptions.MaxRetryDelaySeconds),
-                                errorNumbersToAdd: null);
+                            var connectionString = BuildResilientConnectionString(dbOptions);
+                            options.UseSqlServer(connectionString, sqlOptions =>
+                            {
+                                sqlOptions.EnableRetryOnFailure(
+                                    maxRetryCount: dbOptions.MaxRetryCount,
+                                    maxRetryDelay: TimeSpan.FromSeconds(dbOptions.MaxRetryDelaySeconds),
+                                    errorNumbersToAdd: null);
 
-                            sqlOptions.CommandTimeout(dbOptions.CommandTimeoutSeconds);
-                        });
-                        break;
-                    }
+                                sqlOptions.CommandTimeout(dbOptions.CommandTimeoutSeconds);
+                            });
+                            break;
+                        }
                     case DatabaseProviderType.Sqlite:
                         options.UseSqlite(dbOptions.ConnectionString);
                         break;

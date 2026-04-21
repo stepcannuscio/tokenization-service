@@ -27,7 +27,7 @@ internal static class DependencyInjection
 
         return services;
     }
-        
+
     /// <summary>
     /// Adds InMemory health checks to the service collection.
     /// </summary>
@@ -40,7 +40,7 @@ internal static class DependencyInjection
                 "inmemory-keyprovider",
                 failureStatus: HealthStatus.Unhealthy,
                 tags: ["inmemory", "crypto", "infrastructure"]);
-        
+
         return services;
     }
 }

@@ -14,7 +14,7 @@ namespace Tokenization.Infrastructure.Crypto.Caching;
 /// <para>Long expirations are used intentionally; rotation updates are pushed via <see cref="SetClientsAsync"/>.</para>
 /// <para>Cache keys are generated using a safe, validated mechanism to prevent collisions and ensure consistency.</para>
 /// </remarks>
-internal sealed class KeyClientCache<TKeyClient, TClient>(HybridCache cache, ICacheKeyGenerator keyGenerator) 
+internal sealed class KeyClientCache<TKeyClient, TClient>(HybridCache cache, ICacheKeyGenerator keyGenerator)
     : IKeyClientCache<TKeyClient, TClient> where TKeyClient : IKeyClient<TClient>
 {
     private const string KeyClientNamespace = "KeyClientCache";
@@ -64,7 +64,7 @@ internal sealed class KeyClientCache<TKeyClient, TClient>(HybridCache cache, ICa
 
         var allClientsKey = GetAllClientsCacheKey(keyName);
         await SetCache(allClientsKey, (IReadOnlyList<TKeyClient>)ordered, ct);
-        
+
         var currentClient = clients.FirstOrDefault(client => client.VersionInfo.IsCurrent);
         if (currentClient is not null)
         {
@@ -86,7 +86,7 @@ internal sealed class KeyClientCache<TKeyClient, TClient>(HybridCache cache, ICa
     {
         return keyGenerator.GenerateKey(KeyClientNamespace, AllClientsSuffix, keyName);
     }
-    
+
     private string GetCurrentClientCacheKey(string keyName)
     {
         return keyGenerator.GenerateKey(KeyClientNamespace, CurrentClientSuffix, keyName);

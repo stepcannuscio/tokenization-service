@@ -228,7 +228,7 @@ public class BulkOperationsServiceIntegrationTests(SqlServerFixture sqlFixture) 
         await Assert.ThrowsAsync<ArgumentException>(() =>
             bulkService.BulkDeleteAsync(null!, []));
     }
-    
+
     [Fact]
     public async Task BulkOperations_WithTransaction_RespectsTransactionBoundaries()
     {

@@ -22,7 +22,7 @@ public sealed record CreateTokenRequest
     /// </summary>
     [Required]
     public int ExpirationMonth { get; init; }
-    
+
     /// <summary>
     /// The card expiration year (2000-2100).
     /// </summary>
@@ -54,18 +54,18 @@ public sealed record CreateTokenRequest
     /// </summary>
     [Required]
     public required string PaymentMethodType { get; init; }
-    
+
     /// <summary>
     /// Token type (e.g., OneTime, StoredCredential).
     /// </summary>
     [Required]
-    public required string TokenType { get; init; } 
+    public required string TokenType { get; init; }
 
     /// <summary>
     /// Identifies who initiated the use of a stored credential (e.g., Customer, Merchant).
     /// </summary>
     public string? StoredCredentialInitiator { get; init; }
-        
+
     /// <summary>
     /// Identifies the reason for the stored credential (e.g., Recurring, Installments).
     /// </summary>

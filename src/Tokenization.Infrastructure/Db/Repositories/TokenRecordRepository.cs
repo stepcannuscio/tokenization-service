@@ -76,7 +76,7 @@ internal sealed class TokenRecordRepository(
             .Select(t => t.ToSummary())
             .ToListAsync(ct);
     }
-    
+
     /// <inheritdoc />
     /// <exception cref="OperationCanceledException">Thrown if the operation is canceled via <paramref name="ct"/>.</exception>
     public async Task<EncryptedPayload?> GetEncryptedPayloadAsync(string token, CancellationToken ct = default)
@@ -98,7 +98,7 @@ internal sealed class TokenRecordRepository(
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(token)) throw new ArgumentException("Token is required.", nameof(token));
-        
+
         var entity = await db.Tokens.SingleOrDefaultAsync(t => t.Token == token, ct);
         if (entity is null) throw new InvalidOperationException($"Token '{token}' not found.");
 
@@ -127,7 +127,7 @@ internal sealed class TokenRecordRepository(
         await db.SaveChangesAsync(ct);
         return true;
     }
-    
+
     /// <inheritdoc />
     /// <exception cref="DbUpdateException">Thrown when the database save fails.</exception>
     /// <exception cref="DbUpdateConcurrencyException">Thrown when the database save fails due to a concurrency violation.</exception>
@@ -138,12 +138,12 @@ internal sealed class TokenRecordRepository(
 
         var entity = await db.Tokens.SingleOrDefaultAsync(t => t.Token == token, ct);
         if (entity is null) return false;
-        
+
         db.Tokens.Remove(entity);
         await db.SaveChangesAsync(ct);
         return true;
     }
-    
+
     /// <inheritdoc />
     /// <exception cref="DbUpdateException">Thrown when the database save fails.</exception>
     /// <exception cref="DbUpdateConcurrencyException">Thrown when the database save fails due to a concurrency violation.</exception>
@@ -157,9 +157,9 @@ internal sealed class TokenRecordRepository(
         {
             return [];
         }
-        
+
         var entities = dataList.Select(item => item.args.ToTokenRecord(item.payload)).ToList();
-        
+
         await bulkSvc.BulkInsertAsync(entities, cancellationToken: ct);
 
         return entities.Select(e => e.ToSummary()).ToList();
@@ -185,7 +185,7 @@ internal sealed class TokenRecordRepository(
 
         var parameters = tokenList.Cast<object>().ToArray();
         var allParameters = parameters.Concat([DateTimeOffset.UtcNow]).ToArray();
-        
+
         return await bulkSvc.BulkUpdateAsync(
             string.Format(sql, string.Join(",", parameters.Select((_, i) => $"@p{i}"))),
             allParameters, ct);

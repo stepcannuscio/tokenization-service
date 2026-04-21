@@ -29,7 +29,7 @@ public class InMemoryKeyProviderHealthCheckTests
 
         return optionsMock;
     }
-    
+
     [Fact]
     public async Task InMemoryKeyProviderHealthCheck_WithValidProvider_ShouldReturnHealthy()
     {
@@ -65,7 +65,7 @@ public class InMemoryKeyProviderHealthCheckTests
         result.Status.Should().Be(HealthStatus.Unhealthy);
         result.Description.Should().Contain("key provider");
     }
-    
+
     [Fact]
     public async Task InMemoryKeyProviderHealthCheck_WithFailedWrapRoundTrip_ShouldReturnUnhealthy()
     {
@@ -74,7 +74,7 @@ public class InMemoryKeyProviderHealthCheckTests
         mockKeyProvider.Setup(kp => kp.UnwrapKeyAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        
+
         var healthCheck = new InMemoryKeyProviderHealthCheck(
             mockKeyProvider.Object, _mockLogger.Object, ValidOptionsMock().Object);
 
@@ -85,7 +85,7 @@ public class InMemoryKeyProviderHealthCheckTests
         result.Status.Should().Be(HealthStatus.Unhealthy);
         result.Description.Should().Contain("wrap");
     }
-        
+
     [Fact]
     public async Task InMemoryKeyProviderHealthCheck_WithEmptySignature_ShouldReturnUnhealthy()
     {
@@ -94,7 +94,7 @@ public class InMemoryKeyProviderHealthCheckTests
         mockKeyProvider.Setup(kp => kp.SignDataAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
-        
+
         var healthCheck = new InMemoryKeyProviderHealthCheck(
             mockKeyProvider.Object, _mockLogger.Object, ValidOptionsMock().Object);
 
@@ -105,7 +105,7 @@ public class InMemoryKeyProviderHealthCheckTests
         result.Status.Should().Be(HealthStatus.Unhealthy);
         result.Description.Should().Contain("signature");
     }
-            
+
     [Fact]
     public async Task InMemoryKeyProviderHealthCheck_WithSlowResponseTime_ShouldReturnDegraded()
     {
@@ -118,7 +118,7 @@ public class InMemoryKeyProviderHealthCheckTests
             });
 
         var mockOptions = ValidOptionsMock(healthCheckTimeoutSeconds: 0);
-        
+
         var healthCheck = new InMemoryKeyProviderHealthCheck(
             mockKeyProvider.Object, _mockLogger.Object, mockOptions.Object);
 

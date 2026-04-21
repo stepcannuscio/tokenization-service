@@ -15,12 +15,12 @@ internal static class Scopes
     /// Scope required to create new tokens.
     /// </summary>
     public const string TokenCreate = "tokens.create";
-    
+
     /// <summary>
     /// Scope required to delete tokens.
     /// </summary>
     public const string TokenDelete = "tokens.delete";
-        
+
     /// <summary>
     /// Scope required to detokenize tokens.
     /// </summary>

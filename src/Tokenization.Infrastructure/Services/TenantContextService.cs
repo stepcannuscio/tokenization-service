@@ -1,9 +1,9 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Domain.Exceptions;
 using Tokenization.Infrastructure.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 
 namespace Tokenization.Infrastructure.Services;
 

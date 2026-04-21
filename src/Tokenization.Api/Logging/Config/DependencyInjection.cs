@@ -1,6 +1,6 @@
-using Tokenization.Infrastructure.Authorization;
 using Serilog;
 using Serilog.Events;
+using Tokenization.Infrastructure.Authorization;
 
 namespace Tokenization.Api.Logging.Config;
 
@@ -34,7 +34,7 @@ internal static class DependencyInjection
                 .Destructure.With(new SensitiveDestructuringPolicy());
         });
     }
-    
+
     /// <summary>
     /// Configures Serilog request logging (no bodies; custom level + template).
     /// </summary>
@@ -52,31 +52,31 @@ internal static class DependencyInjection
 
             // Keep the message minimal—no headers or bodies here
             opts.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0} ms";
-            
+
             opts.EnrichDiagnosticContext = (diag, context) =>
             {
                 diag.Set(LogProperties.RequestId, context.TraceIdentifier);
-                
+
                 var userId = context.User.FindFirst("sub")?.Value ?? context.User.Identity?.Name;
                 if (userId != null) diag.Set(LogProperties.UserId, userId);
-                
+
                 var tenantId = context.User.FindFirst(TenantClaims.TenantId)?.Value;
                 if (tenantId != null) diag.Set(LogProperties.TenantId, tenantId);
 
                 var clientIp = context.Connection.RemoteIpAddress?.ToString();
                 if (clientIp != null) diag.Set(LogProperties.ClientIp, clientIp);
-                
+
                 // Add security context for monitoring (only if non-default values)
                 var userAgent = context.Request.Headers.UserAgent.ToString();
-                if (!string.IsNullOrEmpty(userAgent) && userAgent != "unknown") 
+                if (!string.IsNullOrEmpty(userAgent) && userAgent != "unknown")
                     diag.Set(LogProperties.UserAgent, userAgent);
-                
+
                 var requestSize = context.Request.ContentLength;
-                if (requestSize is > 0) 
+                if (requestSize is > 0)
                     diag.Set(LogProperties.RequestSize, requestSize.Value);
-                
+
                 var responseSize = context.Response.ContentLength;
-                if (responseSize is > 0) 
+                if (responseSize is > 0)
                     diag.Set(LogProperties.ResponseSize, responseSize.Value);
             };
         });

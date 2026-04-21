@@ -22,9 +22,9 @@ internal class DetokenizeTokenMapper
     public DetokenizeTokenCommand MapRequest(DetokenizeTokenRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
-        
+
         return new DetokenizeTokenCommand
-        { 
+        {
             Token = request.Token
         };
     }
@@ -40,7 +40,7 @@ internal class DetokenizeTokenMapper
         ArgumentNullException.ThrowIfNull(detokenizedToken);
 
         var cardPlainText = detokenizedToken.ToCardPlaintext();
-        
+
         return new DetokenizeTokenResponse
         {
             Pan = cardPlainText.Pan,

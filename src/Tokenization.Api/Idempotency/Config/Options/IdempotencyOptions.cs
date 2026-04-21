@@ -9,7 +9,7 @@ internal sealed class IdempotencyOptions
     /// Configuration section name.
     /// </summary>
     public const string SectionName = "Idempotency";
-    
+
     /// <summary>
     /// Gets or sets the time-to-live (TTL) in seconds for cached idempotent responses.
     /// After this duration, cached responses will expire and new requests with the same

@@ -1,6 +1,6 @@
 using MediatR;
-using Tokenization.Domain.Exceptions;
 using Tokenization.Domain.Abstractions;
+using Tokenization.Domain.Exceptions;
 
 namespace Tokenization.Application.Handlers.DeleteToken;
 

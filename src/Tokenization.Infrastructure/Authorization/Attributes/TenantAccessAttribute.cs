@@ -1,5 +1,5 @@
-using Tokenization.Infrastructure.Authorization.Filters;
 using Microsoft.AspNetCore.Mvc;
+using Tokenization.Infrastructure.Authorization.Filters;
 
 namespace Tokenization.Infrastructure.Authorization.Attributes;
 

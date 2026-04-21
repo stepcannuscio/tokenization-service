@@ -1,13 +1,13 @@
-using Tokenization.Domain.Abstractions;
-using Tokenization.Infrastructure.Authorization.Attributes;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
-using System.Text;
-using System.Text.Json;
+using Tokenization.Domain.Abstractions;
+using Tokenization.Infrastructure.Authorization.Attributes;
 
 namespace Tokenization.Infrastructure.Authorization.Filters;
 

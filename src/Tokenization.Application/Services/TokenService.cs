@@ -1,6 +1,6 @@
-using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Domain.Exceptions;
 using Tokenization.Domain.ValueObjects;
@@ -20,8 +20,8 @@ internal sealed class TokenService : ITokenService
 
     /// <summary>Creates a new token service with the required domain ports.</summary>
     public TokenService(
-        ITokenRecordRepository repository, 
-        IEncryptionService crypto, 
+        ITokenRecordRepository repository,
+        IEncryptionService crypto,
         ITenantContextService tenantContext,
         ILogger<TokenService> logger)
     {
@@ -41,7 +41,7 @@ internal sealed class TokenService : ITokenService
 
         _logger.LogInformation("Creating token for tenant {TenantId}, customer {CustomerId}, payment method {PaymentMethodType}",
             args.TenantId, args.CustomerId, args.PaymentMethodType);
-        
+
         try
         {
             _tenantContext.ValidateTenantAccess(args.TenantId);
@@ -51,14 +51,14 @@ internal sealed class TokenService : ITokenService
             _logger.LogError("Token creation denied: {Message}. Requested tenant: {TenantId}", ex.Message, args.TenantId);
             throw;
         }
-        
+
         byte[]? local = null;
         try
         {
             local = sensitivePayloadUtf8.ToArray();
             var plaintext = Encoding.UTF8.GetString(local);
             var envelope = await _crypto.EncryptAsync(plaintext, ct);
-            
+
             var result = await _repo.CreateAsync(args, envelope, ct);
             _logger.LogInformation("Token created successfully: {Token} for tenant {TenantId}", result.Token, args.TenantId);
             return result;
@@ -73,25 +73,25 @@ internal sealed class TokenService : ITokenService
     public async Task<TokenSummary> GetSummaryAsync(string token, CancellationToken ct = default)
     {
         _logger.LogDebug("Retrieving token summary for token: {Token}", token);
-        
+
         var summary = await _repo.GetSummaryByTokenAsync(token, ct);
         if (summary is null)
         {
             _logger.LogWarning("Token not found: {Token}", token);
             throw new TokenNotFoundException(token);
         }
-        
+
         try
         {
             _tenantContext.ValidateTenantAccess(summary.TenantId);
         }
         catch (TenantAccessDeniedException ex)
         {
-            _logger.LogError("Token access denied: {Message}. Token: {Token}, Token tenant: {TokenTenantId}", 
+            _logger.LogError("Token access denied: {Message}. Token: {Token}, Token tenant: {TokenTenantId}",
                 ex.Message, token, summary.TenantId);
             throw;
         }
-        
+
         _logger.LogDebug("Token summary retrieved successfully: {Token} for tenant {TenantId}", token, summary.TenantId);
         return summary;
     }
@@ -191,32 +191,32 @@ internal sealed class TokenService : ITokenService
     public async Task<DetokenizedToken> DetokenizeTokenAsync(string token, CancellationToken ct = default)
     {
         _logger.LogInformation("Detokenizing token: {Token}", token);
-        
+
         var summary = await _repo.GetSummaryByTokenAsync(token, ct);
         if (summary is null)
         {
             _logger.LogWarning("Token not found to detokenize: {Token}", token);
             throw new TokenNotFoundException(token);
         }
-        
+
         try
         {
             _tenantContext.ValidateTenantAccess(summary.TenantId);
         }
         catch (TenantAccessDeniedException ex)
         {
-            _logger.LogError("Token detokenize denied: {Message}. Token: {Token}, Token tenant: {TokenTenantId}", 
+            _logger.LogError("Token detokenize denied: {Message}. Token: {Token}, Token tenant: {TokenTenantId}",
                 ex.Message, token, summary.TenantId);
             throw;
         }
-        
+
         var envelope = await _repo.GetEncryptedPayloadAsync(token, ct);
         if (envelope is null)
         {
             _logger.LogWarning("Encrypted payload not found for token: {Token}", token);
             throw new TokenNotFoundException(token);
         }
-        
+
         var result = await _crypto.DecryptAsync(envelope, ct);
         _logger.LogInformation("Token payload decrypted successfully: {Token}", token);
         return new DetokenizedToken(result, summary);
@@ -226,32 +226,32 @@ internal sealed class TokenService : ITokenService
     public async Task DeleteTokenAsync(string token, CancellationToken ct = default)
     {
         _logger.LogInformation("Deleting token: {Token}", token);
-        
+
         var summary = await _repo.GetSummaryByTokenAsync(token, ct);
         if (summary is null)
         {
             _logger.LogWarning("Token not found for deletion: {Token}", token);
             throw new TokenNotFoundException(token);
         }
-        
+
         try
         {
             _tenantContext.ValidateTenantAccess(summary.TenantId);
         }
         catch (TenantAccessDeniedException ex)
         {
-            _logger.LogError("Token deletion denied: {Message}. Token: {Token}, Token tenant: {TokenTenantId}", 
+            _logger.LogError("Token deletion denied: {Message}. Token: {Token}, Token tenant: {TokenTenantId}",
                 ex.Message, token, summary.TenantId);
             throw;
         }
-        
+
         var ok = await _repo.DeleteAsync(token, ct);
         if (!ok)
         {
             _logger.LogWarning("Token deletion failed: {Token}", token);
             throw new TokenNotFoundException(token);
         }
-        
+
         _logger.LogInformation("Token deletion successfully: {Token}", token);
     }
 }

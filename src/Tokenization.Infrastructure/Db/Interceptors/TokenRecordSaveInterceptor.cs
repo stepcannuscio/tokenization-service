@@ -51,7 +51,7 @@ internal sealed class TokenRecordSaveInterceptor : SaveChangesInterceptor
         foreach (var entry in eventData.Context.ChangeTracker.Entries<TokenRecord>())
         {
             if (entry.Entity.GetType() != typeof(TokenRecord)) continue;
-            
+
             if (entry.State is not (EntityState.Added or EntityState.Modified)) continue;
 
             // Blind-index rotation key id
@@ -60,12 +60,12 @@ internal sealed class TokenRecordSaveInterceptor : SaveChangesInterceptor
             // Compute hashes from plaintext IDs (do not index plaintext columns)
             entry.Property(ShadowProperties.TenantHash).CurrentValue =
                 await _blind.ComputeAsync(entry.Entity.TenantId, keyId);
-         
+
             entry.Property(ShadowProperties.CustomerHash).CurrentValue =
                 await _blind.ComputeAsync(entry.Entity.CustomerId, keyId);
         }
     }
-    
+
     private void UpdateTimestamps(DbContextEventData eventData)
     {
         if (eventData.Context is null) return;
@@ -75,7 +75,7 @@ internal sealed class TokenRecordSaveInterceptor : SaveChangesInterceptor
             if (entry.State is not (EntityState.Added or EntityState.Modified)) continue;
 
             var now = DateTimeOffset.UtcNow;
-            
+
             if (entry.State == EntityState.Added && entry.Entity.CreatedAt == default)
             {
                 entry.Entity.CreatedAt = now;

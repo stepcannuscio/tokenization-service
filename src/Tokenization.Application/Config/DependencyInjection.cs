@@ -1,7 +1,7 @@
+using System.Reflection;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 using Tokenization.Application.Handlers;
 using Tokenization.Application.Services;
 using Tokenization.Domain.Abstractions;

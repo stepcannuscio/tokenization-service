@@ -15,7 +15,7 @@ internal interface IRequestMapper<in TRequest, out TCommandRequest, in TCommandR
     /// <param name="request">The API request to map.</param>
     /// <returns>The mapped application layer command.</returns>
     TCommandRequest MapRequest(TRequest request);
-    
+
     /// <summary>
     /// Maps an application layer result to an API response.
     /// </summary>

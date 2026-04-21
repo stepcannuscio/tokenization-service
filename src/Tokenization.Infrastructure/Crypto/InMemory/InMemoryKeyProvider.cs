@@ -31,7 +31,7 @@ internal sealed class InMemoryKeyProvider(IKeyClientCache<InMemoryKeyClient, byt
 
         return await WrapWithClientAsync(client, dek);
     }
-    
+
     /// <inheritdoc />
     public async Task<byte[]> UnwrapKeyAsync(
         byte[] wrappedDek,
@@ -86,7 +86,7 @@ internal sealed class InMemoryKeyProvider(IKeyClientCache<InMemoryKeyClient, byt
 
             return c;
         }).ToList();
-        
+
         var newClient = new InMemoryKeyClient(keyName, currentClients.Count + 1, true);
         currentClients.Add(newClient);
         await cache.SetClientsAsync(keyName, currentClients, ct);
@@ -110,7 +110,7 @@ internal sealed class InMemoryKeyProvider(IKeyClientCache<InMemoryKeyClient, byt
         var newClient = new InMemoryKeyClient(keyName, 1, true);
         await cache.SetClientsAsync(keyName, [newClient], ct);
     }
-    
+
     /// <inheritdoc />
     public async Task<byte[]> SignDataAsync(byte[] data, string keyName, string? keyId, CancellationToken ct = default)
     {
@@ -119,13 +119,13 @@ internal sealed class InMemoryKeyProvider(IKeyClientCache<InMemoryKeyClient, byt
             var exactClient = await cache.GetClientAsync(keyName, keyId, ct);
             if (exactClient is not null) return SignWithClientAsync(exactClient.Client, data);
         }
-        
+
         var client = await GetCurrentClientAsync(keyName, ct);
         if (client is not null) return SignWithClientAsync(client, data);
 
         throw new InvalidOperationException($"Unable to sign data using any key for '{keyName}'.");
     }
-    
+
     private async Task<byte[]?> GetCurrentClientAsync(
         string keyName,
         CancellationToken ct = default)
@@ -173,7 +173,7 @@ internal sealed class InMemoryKeyProvider(IKeyClientCache<InMemoryKeyClient, byt
             throw new CryptographicException("Failed to unwrap dek.");
         }
     }
-    
+
     private static byte[] SignWithClientAsync(byte[] key, byte[] data)
     {
         using var hmac = new HMACSHA256(key);

@@ -22,7 +22,7 @@ internal sealed record EncryptedPayload
     /// AES-GCM authentication tag (e.g., 16 bytes for 128-bit tag).
     /// </summary>
     public required byte[] Tag { get; init; }
-    
+
     /// <summary>
     /// Result of wrapping a freshly generated DEK with a KEK.
     /// </summary>

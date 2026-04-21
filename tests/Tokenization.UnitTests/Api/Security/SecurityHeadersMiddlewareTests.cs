@@ -25,7 +25,8 @@ public sealed class SecurityHeadersMiddlewareTests
         httpContext.Response.Headers.Should().ContainKey("Content-Security-Policy");
         var cspHeader = httpContext.Response.Headers.ContentSecurityPolicy.ToString();
         cspHeader.Should().Contain("default-src 'self'");
-        cspHeader.Should().Contain("script-src 'self' 'unsafe-inline' 'unsafe-eval'");
+        cspHeader.Should().Contain("script-src 'self' 'unsafe-inline'");
+        cspHeader.Should().NotContain("'unsafe-eval'");
         cspHeader.Should().Contain("style-src 'self' 'unsafe-inline'");
         cspHeader.Should().Contain("img-src 'self' data: https:");
         cspHeader.Should().Contain("font-src 'self' data:");
@@ -51,7 +52,7 @@ public sealed class SecurityHeadersMiddlewareTests
     }
 
     [Fact]
-    public async Task SecurityHeadersMiddleware_ShouldAddXXSSProtectionHeader()
+    public async Task SecurityHeadersMiddleware_ShouldNotAddXXSSProtectionHeader()
     {
         // Arrange
         var httpContext = CreateHttpContext();
@@ -61,10 +62,8 @@ public sealed class SecurityHeadersMiddlewareTests
         // Act
         await middleware.InvokeAsync(httpContext);
 
-        // Assert
-        httpContext.Response.Headers.Should().ContainKey("X-XSS-Protection");
-        var header = httpContext.Response.Headers["X-XSS-Protection"].ToString();
-        header.Should().Be("1; mode=block");
+        // Assert — X-XSS-Protection is deprecated; CSP provides equivalent protection
+        httpContext.Response.Headers.Should().NotContainKey("X-XSS-Protection");
     }
 
     [Fact]

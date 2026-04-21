@@ -99,7 +99,7 @@ internal interface ITokenRecordRepository
     /// </returns>
     /// <exception cref="ArgumentException">Thrown when <paramref name="token"/> is <c>null</c> or whitespace.</exception>
     Task<bool> DeactivateAsync(string token, CancellationToken ct = default);
-    
+
     /// <summary>
     /// Deletes a token idempotently.
     /// </summary>

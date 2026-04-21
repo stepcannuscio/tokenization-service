@@ -1,9 +1,9 @@
-using FluentAssertions;
-using Tokenization.Domain.Abstractions;
-using Moq;
 using System.Text;
-using Tokenization.Domain.Exceptions;
+using FluentAssertions;
+using Moq;
 using Tokenization.Application.Services;
+using Tokenization.Domain.Abstractions;
+using Tokenization.Domain.Exceptions;
 using Tokenization.Domain.ValueObjects;
 using Tokenization.Tests.Shared.Utils.ValueObjects;
 using Xunit;
@@ -35,7 +35,7 @@ public class TokenServiceTests
 
         return new TokenServiceWrap(repo, crypto, tenantCtx, logger);
     }
-    
+
     [Fact]
     public async Task IssueToken_WithNullArgs_Throws()
     {
@@ -104,7 +104,7 @@ public class TokenServiceTests
             s => s.CreateAsync(It.IsAny<CreateTokenArgs>(), It.IsAny<EncryptedPayload>(),
                 It.IsAny<CancellationToken>()), Times.Never);
     }
-    
+
     [Fact]
     public async Task IssueToken_WithCancellation_RespectsCancellationToken()
     {
@@ -133,18 +133,18 @@ public class TokenServiceTests
         got.Should().Be(summary);
         wrap.TenantCtx.VerifyAll();
     }
-    
+
     [Fact]
     public async Task GetSummary_NonExistentToken_Throws()
     {
         var wrap = GetTokenServiceWrap();
         wrap.Repo.Setup(r => r.GetSummaryByTokenAsync("missing", CancellationToken.None))
             .ReturnsAsync((TokenSummary?)null);
-        
+
         await FluentActions.Invoking(() => wrap.Svc.GetSummaryAsync("missing"))
             .Should().ThrowAsync<TokenNotFoundException>();
     }
-        
+
     [Fact]
     public async Task GetSummary_InvalidTenantAccess_Throws()
     {
@@ -157,7 +157,7 @@ public class TokenServiceTests
         await FluentActions.Invoking(() => wrap.Svc.GetSummaryAsync("tok", CancellationToken.None))
             .Should().ThrowAsync<TenantAccessDeniedException>();
     }
-    
+
     [Fact]
     public async Task GetSummary_WithCancellation_RespectsCancellationToken()
     {
@@ -171,7 +171,7 @@ public class TokenServiceTests
         await FluentActions.Invoking(() => wrap.Svc.GetSummaryAsync("tok", cts.Token))
             .Should().ThrowAsync<OperationCanceledException>();
     }
-    
+
     [Fact]
     public async Task FindByTenantCustomer_ValidRequest_ReturnsTokens()
     {
@@ -319,7 +319,8 @@ public class TokenServiceTests
         // Inactive
         var inactive = TestTokenSummary.Valid() with
         {
-            Token = "inactive", IsActive = false
+            Token = "inactive",
+            IsActive = false
         };
         wrap.Repo.Setup(r => r.GetSummaryByTokenAsync(inactive.Token, CancellationToken.None)).ReturnsAsync(inactive);
         wrap.TenantCtx.Setup(r => r.ValidateTenantAccess(inactive.TenantId)).Verifiable();
@@ -330,7 +331,8 @@ public class TokenServiceTests
         // Expired
         var expired = TestTokenSummary.Valid() with
         {
-            Token = "expired", ExpiresAt = now.AddMinutes(-1)
+            Token = "expired",
+            ExpiresAt = now.AddMinutes(-1)
         };
         wrap.Repo.Reset();
         wrap.TenantCtx.Reset();
@@ -345,7 +347,9 @@ public class TokenServiceTests
         wrap.TenantCtx.Reset();
         var exceeded = TestTokenSummary.Valid() with
         {
-            Token = "exceeded", UsageCount = 5, MaxUses = 5
+            Token = "exceeded",
+            UsageCount = 5,
+            MaxUses = 5
         };
         wrap.Repo.Setup(r => r.GetSummaryByTokenAsync(exceeded.Token, CancellationToken.None)).ReturnsAsync(exceeded);
         wrap.Repo.Setup(r => r.DeactivateAsync(exceeded.Token, CancellationToken.None)).ReturnsAsync(true).Verifiable();
@@ -354,7 +358,7 @@ public class TokenServiceTests
             .Should().ThrowAsync<TokenUsageExceededException>();
         wrap.TenantCtx.VerifyAll();
     }
-    
+
     [Fact]
     public async Task DetokenizeToken_WithValidToken_ReturnsDecryptedPayload()
     {

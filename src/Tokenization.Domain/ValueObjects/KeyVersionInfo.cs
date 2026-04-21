@@ -10,7 +10,7 @@ internal sealed record KeyVersionInfo
     /// Store this for fast exact-version unwraps.
     /// </summary>
     public required string KekKeyId { get; init; }
-    
+
     /// <summary>
     /// UTC timestamp of when this KEK version was created.
     /// </summary>

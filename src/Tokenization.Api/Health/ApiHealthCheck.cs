@@ -14,7 +14,7 @@ internal sealed class ApiHealthCheck(
     : IHealthCheck
 {
     private readonly ApiHealthCheckOptions _options = options.Value;
-    
+
     public Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)
@@ -23,14 +23,14 @@ internal sealed class ApiHealthCheck(
         {
             return Task.FromResult(HealthCheckResult.Healthy("API health checks are disabled"));
         }
-        
+
         try
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             // Basic API health check - verify that we can process a simple operation
             // This is a lightweight check that doesn't depend on external services
-            
+
             var currentTime = DateTimeOffset.UtcNow;
             var processId = Environment.ProcessId;
             var machineName = Environment.MachineName;
@@ -58,7 +58,7 @@ internal sealed class ApiHealthCheck(
                     data: data));
             }
 
-            logger.LogDebug("API health check completed successfully in {ElapsedMs}ms", 
+            logger.LogDebug("API health check completed successfully in {ElapsedMs}ms",
                 stopwatch.ElapsedMilliseconds);
 
             return Task.FromResult(HealthCheckResult.Healthy("API is responsive and functioning correctly", data));

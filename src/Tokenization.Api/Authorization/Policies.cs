@@ -17,13 +17,13 @@ internal static class Policies
     /// Requires either the <see cref="Scopes.TokenCreate"/> scope or the <see cref="Roles.TokenAdmin"/> role.
     /// </summary>
     public const string CanCreateTokens = nameof(CanCreateTokens);
-        
+
     /// <summary>
     /// Policy that allows users to delete tokens.
     /// Requires either the <see cref="Scopes.TokenDelete"/> scope or the <see cref="Roles.TokenAdmin"/> role.
     /// </summary>
     public const string CanDeleteTokens = nameof(CanDeleteTokens);
-            
+
     /// <summary>
     /// Policy that allows users to detokenize tokens.
     /// Requires either the <see cref="Scopes.TokenDetokenize"/> scope or the <see cref="Roles.TokenAdmin"/> role.

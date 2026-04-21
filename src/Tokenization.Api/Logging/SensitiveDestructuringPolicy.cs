@@ -1,6 +1,6 @@
+using System.Reflection;
 using Serilog.Core;
 using Serilog.Events;
-using System.Reflection;
 
 namespace Tokenization.Api.Logging;
 
@@ -9,12 +9,12 @@ internal sealed class SensitiveDestructuringPolicy : IDestructuringPolicy
     public bool TryDestructure(object? value, ILogEventPropertyValueFactory factory, out LogEventPropertyValue result)
     {
         result = null!;
-        
+
         if (value == null)
         {
             return false;
         }
-        
+
         var type = value.GetType();
 
         // Fast-path scalars
@@ -40,7 +40,7 @@ internal sealed class SensitiveDestructuringPolicy : IDestructuringPolicy
     }
 
     private static ScalarValue Mask(object? v, Sensitivity kind) =>
-        new (kind switch
+        new(kind switch
         {
             Sensitivity.Payment => MaskPayment(v as string),
             Sensitivity.Credential => "********",

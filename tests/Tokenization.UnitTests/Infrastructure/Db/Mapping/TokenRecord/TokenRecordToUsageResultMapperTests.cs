@@ -14,7 +14,7 @@ public class TokenRecordToUsageResultMapperTests
         var env = TestEncryptedPayload.Valid();
 
         var entity = args.ToTokenRecord(env);
-        
+
         entity.UsageCount = 3;
         entity.IsActive = true;
 

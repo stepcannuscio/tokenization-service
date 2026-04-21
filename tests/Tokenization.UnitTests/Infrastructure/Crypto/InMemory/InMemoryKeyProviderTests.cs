@@ -1,10 +1,10 @@
+using System.Security.Cryptography;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using System.Security.Cryptography;
+using Tokenization.Domain.Abstractions;
 using Tokenization.Infrastructure.Caching;
 using Tokenization.Infrastructure.Crypto.Caching;
-using Tokenization.Domain.Abstractions;
 using Tokenization.Infrastructure.Crypto.InMemory;
 using Tokenization.Tests.Shared.Fixtures;
 using Tokenization.Tests.Shared.Utils.Cache;
@@ -36,7 +36,7 @@ public class InMemoryKeyProviderTests
         var cipher = enc.TransformFinalBlock(dek, 0, dek.Length);
         return aes.IV.Concat(cipher).ToArray(); // IV || C
     }
-        
+
     [Fact]
     public async Task Wrap_Then_Unwrap_Roundtrip_With_Known_KEK()
     {
@@ -61,10 +61,10 @@ public class InMemoryKeyProviderTests
         // Known DEK (32 bytes)
         var dek = Convert.FromHexString(
             "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F");
-            
+
         var wrapped = await provider.WrapKeyAsync(dek, cacheKey);
         var roundtrip = await provider.UnwrapKeyAsync(wrapped.WrappedDek, cacheKey, wrapped.KekKeyId);
-            
+
         wrapped.KekKeyId.Should().Be(keyId);
         wrapped.Algorithm.Should().Be("AES-CBC-DEV");
         wrapped.WrappedDek.Should().NotBeNull();
@@ -111,7 +111,7 @@ public class InMemoryKeyProviderTests
 
         payload.KekKeyId.Should().Be(newId);
     }
-        
+
     [Fact]
     public async Task Wrap_Throws_When_No_Clients_Available()
     {
@@ -348,7 +348,7 @@ public class InMemoryKeyProviderTests
         var cache = new Mock<IKeyClientCache<InMemoryKeyClient, byte[]>>(MockBehavior.Strict);
         cache.Setup(c => c.GetCurrentClientAsync(key, CancellationToken.None)).ReturnsAsync((InMemoryKeyClient?)null);
         cache.Setup(c => c.GetAllClientsAsync(key, CancellationToken.None)).ReturnsAsync([]);
-        
+
         var provider = new InMemoryKeyProvider(cache.Object);
 
         await FluentActions.Invoking(() => provider.SignDataAsync("test"u8.ToArray(), key, null))

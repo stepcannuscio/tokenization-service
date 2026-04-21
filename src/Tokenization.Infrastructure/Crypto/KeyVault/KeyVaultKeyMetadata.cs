@@ -1,6 +1,6 @@
+using System.Text.Json.Serialization;
 using Azure.Core;
 using Azure.Security.KeyVault.Keys.Cryptography;
-using System.Text.Json.Serialization;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Domain.ValueObjects;
 

@@ -1,9 +1,9 @@
+using System.Security.Cryptography;
 using Azure.Identity;
 using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
 using FluentAssertions;
 using Moq;
-using System.Security.Cryptography;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Infrastructure.Crypto.KeyVault;
 using Tokenization.Infrastructure.Crypto.KeyVault.Mapping;
@@ -62,7 +62,7 @@ public class KeyVaultProviderTests
         var crypto = new Mock<CryptographyClient>(MockBehavior.Strict);
         crypto.Setup(c => c.WrapKeyAsync(KeyWrapAlgorithm.RsaOaep256, It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CryptographyModelFactory.WrapResult(keyId, [1], KeyWrapAlgorithm.RsaOaep256));
-        
+
         var metadata = new KeyVaultKeyMetadata(keyId, credential, keyVaultKey.ToKeyVersionInfo()) { Client = crypto.Object };
 
         var cache = new Mock<IKeyClientCache<KeyVaultKeyMetadata, CryptographyClient>>(MockBehavior.Strict);
@@ -87,13 +87,13 @@ public class KeyVaultProviderTests
         const string keyId2 = "https://vault/keys/pay-kek/v2";
         var keyVaultKey1 = TestKeyVaultKey.New(keyId1, "v1", DateTimeOffset.UtcNow.AddMinutes(-5));
         var keyVaultKey2 = TestKeyVaultKey.New(keyId2, "v2", DateTimeOffset.UtcNow);
-        
+
         var metadata1 = new KeyVaultKeyMetadata(keyId1, credential, keyVaultKey1.ToKeyVersionInfo()) { Client = new Mock<CryptographyClient>().Object };
 
         var crypto2 = new Mock<CryptographyClient>(MockBehavior.Strict);
         crypto2.Setup(c => c.WrapKeyAsync(KeyWrapAlgorithm.RsaOaep256, It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CryptographyModelFactory.WrapResult(keyId2, [2], KeyWrapAlgorithm.RsaOaep256));
-        
+
         var metadata2 = new KeyVaultKeyMetadata(keyId2, credential, keyVaultKey2.ToKeyVersionInfo()) { Client = crypto2.Object };
 
         var cache = new Mock<IKeyClientCache<KeyVaultKeyMetadata, CryptographyClient>>(MockBehavior.Strict);
@@ -128,7 +128,7 @@ public class KeyVaultProviderTests
         good.Setup(
                 c => c.UnwrapKeyAsync(KeyWrapAlgorithm.RsaOaep256, It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => CryptographyModelFactory.UnwrapResult(keyId2, resultDek, KeyWrapAlgorithm.RsaOaep256));
-        
+
         var currentMetadata = new KeyVaultKeyMetadata(keyId1, credential, current.ToKeyVersionInfo()) { Client = bad.Object };
         var fallbackMetadata = new KeyVaultKeyMetadata(keyId2, credential, fallback.ToKeyVersionInfo()) { Client = good.Object };
 
@@ -139,7 +139,7 @@ public class KeyVaultProviderTests
             .ReturnsAsync([currentMetadata, fallbackMetadata]); // fallback → v2 OK
 
         var metadataFactory = new KeyVaultKeyMetadataFactory(credential);
-       
+
         var provider = new KeyVaultProvider(new Mock<KeyClient>(MockBehavior.Strict).Object, cache.Object, metadataFactory);
 
         var unwrapped = await provider.UnwrapKeyAsync([5, 6], cacheKey, keyId1);
@@ -158,7 +158,7 @@ public class KeyVaultProviderTests
         cache.Setup(c => c.GetAllClientsAsync(cacheKey, CancellationToken.None)).ReturnsAsync([]);
 
         var metadataFactory = new KeyVaultKeyMetadataFactory(cred);
-        
+
         var sut = new KeyVaultProvider(new Mock<KeyClient>(MockBehavior.Strict).Object, cache.Object, metadataFactory);
 
         await FluentActions.Invoking(() => sut.WrapKeyAsync(new byte[32], cacheKey))
@@ -177,7 +177,7 @@ public class KeyVaultProviderTests
         var bad = new Mock<CryptographyClient>(MockBehavior.Strict);
         bad.Setup(c => c.UnwrapKeyAsync(KeyWrapAlgorithm.RsaOaep256, It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new CryptographicException());
-        
+
         var v1Metadata = new KeyVaultKeyMetadata(keyId, credential, keyVaultKey.ToKeyVersionInfo()) { Client = bad.Object };
 
         var cache = new Mock<IKeyClientCache<KeyVaultKeyMetadata, CryptographyClient>>(MockBehavior.Strict);
@@ -185,7 +185,7 @@ public class KeyVaultProviderTests
         cache.Setup(c => c.GetAllClientsAsync(cacheKey, CancellationToken.None)).ReturnsAsync([v1Metadata]);
 
         var metadataFactory = new KeyVaultKeyMetadataFactory(credential);
-        
+
         var sut = new KeyVaultProvider(new Mock<KeyClient>(MockBehavior.Strict).Object, cache.Object, metadataFactory);
 
         await FluentActions.Invoking(() => sut.UnwrapKeyAsync([7], cacheKey, keyId))
@@ -203,10 +203,10 @@ public class KeyVaultProviderTests
 
         var crypto = new Mock<CryptographyClient>(MockBehavior.Strict);
         var expectedSignature = Convert.FromHexString("1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF");
-        
+
         crypto.Setup(c => c.SignDataAsync(SignatureAlgorithm.RS256, It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CryptographyModelFactory.SignResult(keyId, expectedSignature, SignatureAlgorithm.RS256));
-        
+
         var clientMetadata = new KeyVaultKeyMetadata(keyId, credential, keyVaultKey.ToKeyVersionInfo()) { Client = crypto.Object };
 
         var cache = new Mock<IKeyClientCache<KeyVaultKeyMetadata, CryptographyClient>>();
@@ -214,7 +214,7 @@ public class KeyVaultProviderTests
         cache.Setup(c => c.GetAllClientsAsync(cacheKey, CancellationToken.None)).ReturnsAsync([clientMetadata]);
 
         var metadataFactory = new KeyVaultKeyMetadataFactory(credential);
-        
+
         var provider = new KeyVaultProvider(new Mock<KeyClient>(MockBehavior.Strict).Object, cache.Object, metadataFactory);
         var testData = "test-data-for-signing"u8.ToArray();
 
@@ -244,7 +244,7 @@ public class KeyVaultProviderTests
         var signature2 = Convert.FromHexString("2222222222222222222222222222222222222222222222222222222222222222");
         crypto2.Setup(c => c.SignDataAsync(SignatureAlgorithm.RS256, It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(CryptographyModelFactory.SignResult(keyId2, signature2, SignatureAlgorithm.RS256));
-        
+
         var metadata1 = new KeyVaultKeyMetadata(keyId1, credential, keyVaultKey1.ToKeyVersionInfo()) { Client = crypto1.Object };
         var metadata2 = new KeyVaultKeyMetadata(keyId2, credential, keyVaultKey2.ToKeyVersionInfo()) { Client = crypto2.Object };
 
@@ -254,13 +254,13 @@ public class KeyVaultProviderTests
         cache.Setup(c => c.GetAllClientsAsync(cacheKey, CancellationToken.None)).ReturnsAsync([metadata1, metadata2]);
 
         var metadataFactory = new KeyVaultKeyMetadataFactory(credential);
-        
+
         var provider = new KeyVaultProvider(new Mock<KeyClient>(MockBehavior.Strict).Object, cache.Object, metadataFactory);
         var testData = "test-data"u8.ToArray();
 
         // Sign with specific key ID (should use client1)
         var signatureWithKeyId = await provider.SignDataAsync(testData, cacheKey, keyId1);
-        
+
         // Sign without key ID (should use current client2)
         var signatureWithoutKeyId = await provider.SignDataAsync(testData, cacheKey, null);
 
@@ -298,17 +298,17 @@ public class KeyVaultProviderTests
         var crypto = new Mock<CryptographyClient>(MockBehavior.Strict);
         var signature1 = Convert.FromHexString("1111111111111111111111111111111111111111111111111111111111111111");
         var signature2 = Convert.FromHexString("2222222222222222222222222222222222222222222222222222222222222222");
-        
+
         var callCount = 0;
         crypto.Setup(c => c.SignDataAsync(SignatureAlgorithm.RS256, It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(() =>
             {
                 callCount++;
-                return callCount == 1 
+                return callCount == 1
                     ? CryptographyModelFactory.SignResult(keyId, signature1, SignatureAlgorithm.RS256)
                     : CryptographyModelFactory.SignResult(keyId, signature2, SignatureAlgorithm.RS256);
             });
-        
+
         var clientMetadata = new KeyVaultKeyMetadata(keyId, credential, keyVaultKey.ToKeyVersionInfo()) { Client = crypto.Object };
 
         var cache = new Mock<IKeyClientCache<KeyVaultKeyMetadata, CryptographyClient>>();
@@ -316,12 +316,12 @@ public class KeyVaultProviderTests
         cache.Setup(c => c.GetAllClientsAsync(cacheKey, CancellationToken.None)).ReturnsAsync([clientMetadata]);
 
         var metadataFactory = new KeyVaultKeyMetadataFactory(credential);
-        
+
         var provider = new KeyVaultProvider(new Mock<KeyClient>(MockBehavior.Strict).Object, cache.Object, metadataFactory);
 
         var data1 = "data1"u8.ToArray();
         var data2 = "data2"u8.ToArray();
-        
+
         var result1 = await provider.SignDataAsync(data1, cacheKey, keyId);
         var result2 = await provider.SignDataAsync(data2, cacheKey, keyId);
 

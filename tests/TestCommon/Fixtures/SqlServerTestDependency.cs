@@ -5,7 +5,8 @@ namespace Tokenization.Tests.Shared.Fixtures;
 internal static class SqlServerTestDependency
 {
     private const string LocalComposeHost = "localhost,14333";
-    private const string LocalComposePassword = "Your_strong_password123";
+    private static readonly string LocalComposePassword =
+        Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD") ?? "Your_strong_password123";
 
     public static async Task<string?> TryGetLocalComposeConnectionStringAsync(CancellationToken ct = default)
     {

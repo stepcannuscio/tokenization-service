@@ -19,7 +19,7 @@ internal static class TestKeyClient
 
         mockClient.Setup(kp => kp.GetPropertiesOfKeysAsync(It.IsAny<CancellationToken>()))
             .Returns(asyncPagedResponse);
-        
+
         return mockClient;
     }
 }

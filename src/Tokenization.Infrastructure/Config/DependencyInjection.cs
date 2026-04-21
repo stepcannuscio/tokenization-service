@@ -4,13 +4,13 @@ using Tokenization.Domain.Abstractions;
 using Tokenization.Infrastructure.Caching.Config;
 using Tokenization.Infrastructure.Caching.Config.Options;
 using Tokenization.Infrastructure.Caching.Health.Config;
+using Tokenization.Infrastructure.Config.Options;
 using Tokenization.Infrastructure.Crypto.Config;
 using Tokenization.Infrastructure.Crypto.Health.Config;
-using Tokenization.Infrastructure.Db.Config;
-using Tokenization.Infrastructure.Db.Health.Config;
-using Tokenization.Infrastructure.Config.Options;
 using Tokenization.Infrastructure.Crypto.Services;
+using Tokenization.Infrastructure.Db.Config;
 using Tokenization.Infrastructure.Db.Config.Options;
+using Tokenization.Infrastructure.Db.Health.Config;
 using Tokenization.Infrastructure.Services;
 
 namespace Tokenization.Infrastructure.Config;
@@ -42,43 +42,43 @@ internal static class DependencyInjection
             .Bind(config.GetSection(KeyStorageOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        
+
         services.AddCryptoInfra(config);
         services.AddDbInfra(config);
         services.AddCachingInfra(config);
         services.AddScoped<ITenantContextService, TenantContextService>();
-        
+
         services.AddScoped<IEncryptionService>(sp =>
         {
             var keyStorageOptions = config.GetSection(KeyStorageOptions.SectionName).Get<KeyStorageOptions>();
             var keyProvider = sp.GetRequiredService<IKeyProvider>();
             return new EncryptionService(keyProvider, keyStorageOptions?.KekKeyName ?? string.Empty);
         });
-        
+
         // Register health checks
         services.AddHealthChecks();
-        
+
         // Add database health check
         var dbOptions = config.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>();
         if (dbOptions != null)
         {
             services.AddDbHealthCheck(dbOptions);
         }
-        
+
         // Add cache health check
         var cacheOptions = config.GetSection(CacheOptions.SectionName).Get<CacheOptions>();
         if (cacheOptions != null)
         {
             services.AddCacheHealthCheck(cacheOptions);
         }
-        
+
         // Add crypto health checks
         var keyStorageOptions = config.GetSection(KeyStorageOptions.SectionName).Get<KeyStorageOptions>();
         if (keyStorageOptions != null)
         {
             services.AddCryptoHealthChecks(keyStorageOptions);
         }
-        
+
         return services;
     }
 }

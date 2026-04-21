@@ -1,7 +1,7 @@
+using System.Data.Common;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Data.Common;
 using Tokenization.Infrastructure.Db.Config.Options;
 
 namespace Tokenization.Infrastructure.Db.Interceptors;

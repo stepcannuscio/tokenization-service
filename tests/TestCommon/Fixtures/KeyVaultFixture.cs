@@ -19,13 +19,13 @@ public sealed class KeyVaultFixture : IAsyncLifetime
     private ServiceProvider? ServiceProvider { get; set; }
     private HybridCacheFixture? HybridCacheFixture { get; set; }
     private IKeyProvider? KeyVaultProvider { get; set; }
-    
+
     public KeyClient? KeyClient { get; private set; }
     public string? VaultUrl { get; private set; }
     public string? KekKeyName { get; private set; }
     public string? BlindIndexKeyName { get; private set; }
     public HybridCache? Cache { get; set; }
-    
+
     public async Task InitializeAsync()
     {
         if (!ShouldRunKeyVaultTests())
@@ -51,33 +51,33 @@ public sealed class KeyVaultFixture : IAsyncLifetime
             throw SkipException.ForSkip(
                 "Key Vault integration tests require VaultUrl, KekKeyName, and BlindIndexKeyName.");
         }
-        
+
         VaultUrl = keyStorage.VaultUrl;
         KekKeyName = keyStorage.KekKeyName;
         BlindIndexKeyName = keyStorage.BlindIndexKeyName;
 
         // Set up services
         var services = new ServiceCollection();
-        
+
         // Add configuration
         services.AddSingleton(configuration);
         services.AddOptions<KeyStorageOptions>()
             .Bind(configuration.GetSection(KeyStorageOptions.SectionName))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-        
+
         services.AddSingleton<ICacheKeyGenerator, CacheKeyGenerator>();
-        
+
         // Add cache infrastructure using HybridCacheFixture
         services.AddSingleton(HybridCacheFixture.Cache ??
                               throw new InvalidOperationException("HybridCache is not available from fixture"));
-        
+
         // Add KeyVault infrastructure
         services.AddKeyVaultInfra();
-        
+
         // Build service provider
         ServiceProvider = services.BuildServiceProvider();
-        
+
         // Get required services
         KeyClient = ServiceProvider.GetRequiredService<KeyClient>();
         KeyVaultProvider = ServiceProvider.GetRequiredKeyedService<IKeyProvider>(KeyProviderType.AzureKeyVault);
@@ -97,7 +97,7 @@ public sealed class KeyVaultFixture : IAsyncLifetime
     public T GetKeyVaultProvider<T>() where T : class => (T?)KeyVaultProvider ??
                                                          throw new InvalidOperationException(
                                                              "KeyVaultProvider does not exist.");
-    
+
     public async Task DisposeAsync()
     {
         if (HybridCacheFixture is not null)

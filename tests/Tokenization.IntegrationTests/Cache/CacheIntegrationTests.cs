@@ -22,7 +22,7 @@ public class CacheIntegrationTests : IClassFixture<HybridCacheFixture>
         _mockOptions.Setup(x => x.Value).Returns(new CacheOptions());
         _fixture = fixture;
     }
-        
+
     [Fact]
     public async Task CacheHealthCheck_WithHealthyRedis_ShouldReturnHealthy()
     {
@@ -46,11 +46,11 @@ public class CacheIntegrationTests : IClassFixture<HybridCacheFixture>
         const string invalidConnectionString = "localhost:9999,connectTimeout=100,syncTimeout=100,abortConnect=true";
         _fixture.SetServiceCollection(invalidConnectionString);
         var healthCheck = new CacheHealthCheck(_fixture.Cache!, _mockLogger.Object, _mockOptions.Object);
-    
+
         // Act
         var result = await healthCheck.CheckHealthAsync(new HealthCheckContext());
         _fixture.ResetServiceCollection();
-        
+
         // Assert
         result.Status.Should().Be(HealthStatus.Unhealthy);
         result.Description.Should().Contain("Cache");

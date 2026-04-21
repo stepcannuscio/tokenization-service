@@ -16,15 +16,15 @@ public class CreateTokenHandlerTests
         // Arrange
         var cmd = TestCreateTokenCommand.Valid();
         var summary = TestTokenSummary.Valid();
-        
+
         var svc = new Mock<ITokenService>(MockBehavior.Strict);
         var args = cmd.ToCreateTokenArgs();
         var payload = cmd.ToSensitivePayload();
         svc.Setup(s => s.IssueTokenAsync(args, It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(summary);
-        
+
         var handler = new CreateTokenHandler(svc.Object);
-        
+
         // Act
         var result = await handler.Handle(cmd, CancellationToken.None);
 

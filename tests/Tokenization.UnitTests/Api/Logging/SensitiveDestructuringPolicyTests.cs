@@ -1,7 +1,7 @@
+using System.Reflection;
 using FluentAssertions;
 using Serilog.Core;
 using Serilog.Events;
-using System.Reflection;
 using Tokenization.Api.Logging;
 using Xunit;
 
@@ -63,11 +63,11 @@ public class SensitiveDestructuringPolicyTests
         result.Should().BeTrue();
         output.Should().NotBeNull();
         output.Should().BeOfType<StructureValue>();
-        
+
         var structure = output as StructureValue;
         structure!.TypeTag.Should().Be(nameof(TestObject));
         structure.Properties.Should().HaveCount(3);
-        
+
         var properties = structure.Properties.ToDictionary(p => p.Name, p => p.Value);
         properties["Name"].Should().BeOfType<ScalarValue>().Which.Value.Should().Be("John Doe");
         properties["Age"].Should().BeOfType<ScalarValue>().Which.Value.Should().Be(30);
@@ -92,7 +92,7 @@ public class SensitiveDestructuringPolicyTests
         // Assert
         result.Should().BeTrue();
         output.Should().NotBeNull();
-        
+
         var structure = output as StructureValue;
         var sensitiveProperty = structure!.Properties.FirstOrDefault(p => p.Name == "SensitiveData");
         sensitiveProperty.Should().NotBeNull();
@@ -115,7 +115,7 @@ public class SensitiveDestructuringPolicyTests
         // Assert
         result.Should().BeTrue();
         output.Should().NotBeNull();
-        
+
         var structure = output as StructureValue;
         var sensitiveProperty = structure!.Properties.FirstOrDefault(p => p.Name == "SensitiveData");
         sensitiveProperty.Should().NotBeNull();
@@ -141,16 +141,16 @@ public class SensitiveDestructuringPolicyTests
         // Assert
         result.Should().BeTrue();
         output.Should().NotBeNull();
-        
+
         var structure = output as StructureValue;
         var properties = structure!.Properties.ToDictionary(p => p.Name, p => p.Value);
-        
+
         properties["PublicName"].As<ScalarValue>().Value.Should().Be("John Doe");
         properties["PaymentCard"].As<ScalarValue>().Value.Should().Be("**** **** **** 1111");
         properties["Password"].As<ScalarValue>().Value.Should().Be("********");
         properties["Age"].As<ScalarValue>().Value.Should().Be(25);
     }
-    
+
     [Fact]
     public void TryDestructure_WithNullValue_ShouldHandleGracefully()
     {
@@ -159,7 +159,7 @@ public class SensitiveDestructuringPolicyTests
 
         // Act
         var success = _policy.TryDestructure(nullObject!, _factory, out var result);
-        
+
         // Assert
         success.Should().BeFalse();
         result.Should().BeNull();
@@ -212,20 +212,20 @@ public class SensitiveDestructuringPolicyTests
     private class MixedSensitiveObject
     {
         public string PublicName { get; set; } = string.Empty;
-        
+
         [Sensitive(Sensitivity.Payment)]
         public string PaymentCard { get; set; } = string.Empty;
-        
+
         [Sensitive(Sensitivity.Credential)]
         public string Password { get; set; } = string.Empty;
-        
+
         public int Age { get; set; }
     }
 
     private class ObjectWithNonReadableProperty
     {
         public string ReadableProperty { get; set; } = string.Empty;
-        
+
         public string NonReadableProperty { private get; set; } = string.Empty;
     }
 

@@ -1,6 +1,6 @@
+using System.Security.Cryptography;
 using FluentAssertions;
 using Moq;
-using System.Security.Cryptography;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Infrastructure.Db.BlindIndex;
 using Xunit;
@@ -31,12 +31,12 @@ public class BlindIndexServiceTests
             {
                 if (!keysDict.TryGetValue(keyId ?? string.Empty, out var key))
                     throw new InvalidOperationException();
-                
+
                 // Simulate HMAC-SHA256 computation using the key
                 using var hmac = new HMACSHA256(key);
                 return Task.FromResult(hmac.ComputeHash(data));
             });
-        
+
         return new BlindIndexService(keyProvider.Object, "blind-index-key");
     }
 
@@ -117,7 +117,7 @@ public class BlindIndexServiceTests
     {
         // Test that BlindIndexService properly handles hash lengths that aren't exactly 32 bytes
         var keyProvider = new Mock<IKeyProvider>();
-        
+
         keyProvider.Setup(c => c.SignDataAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<string>(),
                 It.IsAny<CancellationToken>()))
             .Returns<byte[], string, string?, CancellationToken>((data, _, _, _) =>
@@ -131,10 +131,10 @@ public class BlindIndexServiceTests
                 Array.Copy(hash, 0, longHash, 32, 8);
                 return Task.FromResult(longHash);
             });
-        
+
         var svc = new BlindIndexService(keyProvider.Object, "blind-index-key");
         var result = await svc.ComputeAsync("test-value", "v1");
-        
+
         result.Should().NotBeNull();
         result.Length.Should().Be(32); // Should be truncated to exactly 32 bytes
     }

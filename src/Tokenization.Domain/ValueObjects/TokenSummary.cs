@@ -30,9 +30,9 @@ internal static class TokenSummaryExtensions
     {
         return summary.ExpiresAt is not null && summary.ExpiresAt < (nowUtc ?? DateTimeOffset.UtcNow);
     }
-    
+
     public static bool IsUsageExceeded(this TokenSummary summary)
     {
         return summary.MaxUses.HasValue && summary.UsageCount >= summary.MaxUses;
     }
-} 
+}

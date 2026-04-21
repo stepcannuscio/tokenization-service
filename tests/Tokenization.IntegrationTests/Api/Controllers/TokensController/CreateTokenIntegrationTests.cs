@@ -1,8 +1,8 @@
+using System.Net;
+using System.Text.Json;
 using FluentAssertions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System.Text.Json;
 using Tokenization.Api.Authorization;
 using Tokenization.Api.Idempotency;
 using Tokenization.Api.Requests.v1;
@@ -160,9 +160,9 @@ public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
                 });
             });
         }).CreateClient();
-        
+
         client1.DefaultRequestHeaders.Add(IdempotencyHeaders.IdempotencyKey, Guid.NewGuid().ToString());
-        
+
         var request1 = TestCreateTokenRequest.Valid();
         var response1 = await client1.PostAsJsonAsync("/api/v1/tokens", request1);
 
@@ -180,7 +180,7 @@ public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
         }).CreateClient();
 
         client2.DefaultRequestHeaders.Add(IdempotencyHeaders.IdempotencyKey, Guid.NewGuid().ToString());
-        
+
         var request2 = TestCreateTokenRequest.Valid();
         var response2 = await client2.PostAsJsonAsync("/api/v1/tokens", request2);
 

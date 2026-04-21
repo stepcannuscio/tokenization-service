@@ -1,7 +1,7 @@
+using System.Security.Cryptography;
 using Azure;
 using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
-using System.Security.Cryptography;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Domain.ValueObjects;
 using Tokenization.Infrastructure.Crypto.KeyVault.Mapping;
@@ -28,10 +28,10 @@ internal sealed class KeyVaultProvider(
         {
             throw new InvalidOperationException($"No KEKs available to wrap DEK with for '{keyName}'");
         }
-        
+
         return await WrapWithClientAsync(client.Client, dek, ct);
     }
-    
+
     /// <inheritdoc />
     public async Task<byte[]> UnwrapKeyAsync(
         byte[] wrappedDek,
@@ -105,7 +105,7 @@ internal sealed class KeyVaultProvider(
     {
         await ReloadKeysAsync(keyName, ct);
     }
-    
+
     /// <inheritdoc />
     /// <exception cref="RequestFailedException">Thrown when request to sign the data fails.</exception>
     public async Task<byte[]> SignDataAsync(byte[] data, string keyName, string? keyId, CancellationToken ct = default)
@@ -115,13 +115,13 @@ internal sealed class KeyVaultProvider(
             var exactClient = await GetClientWithCredentialAsync(keyName, keyId, ct);
             if (exactClient is not null) return await SignWithClientAsync(exactClient.Client, data, ct);
         }
-        
+
         var client = await GetCurrentClientWithCredentialAsync(keyName, ct);
         if (client is not null) return await SignWithClientAsync(client.Client, data, ct);
 
         throw new InvalidOperationException($"Unable to sign data using any key for '{keyName}'.");
     }
-    
+
     private async Task<KeyVaultKeyMetadata?> GetCurrentClientWithCredentialAsync(
         string keyName,
         CancellationToken ct = default)
@@ -179,7 +179,7 @@ internal sealed class KeyVaultProvider(
         var res = await client.UnwrapKeyAsync(KeyWrapAlgorithm.RsaOaep256, wrappedDek, ct);
         return res.Key;
     }
-    
+
     private static async Task<byte[]> SignWithClientAsync(
         CryptographyClient client,
         byte[] data,

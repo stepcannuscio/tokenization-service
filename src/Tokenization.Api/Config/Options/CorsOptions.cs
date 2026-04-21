@@ -9,7 +9,7 @@ internal sealed class CorsOptions
     /// Configuration section name.
     /// </summary>
     public const string SectionName = "Cors";
-    
+
     /// <summary>
     /// The name of the CORS policy to use.
     /// </summary>

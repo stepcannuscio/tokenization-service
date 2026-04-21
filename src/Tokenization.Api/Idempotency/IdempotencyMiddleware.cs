@@ -55,7 +55,7 @@ internal sealed class IdempotencyMiddleware(
                 await HandleMissingIdempotencyKey(context);
                 return;
             }
-            
+
             var partition = GetPartitionKey(context);
             var cacheKey = hasher.Hash(partition, context.Request.Method, context.Request.Path, key);
 
@@ -91,7 +91,7 @@ internal sealed class IdempotencyMiddleware(
                HttpMethods.IsPut(method) ||
                HttpMethods.IsPatch(method);
     }
-    
+
     private static string? GetIdempotencyKey(HttpContext context)
     {
         return context.Request.Headers.TryGetValue(IdempotencyHeaders.IdempotencyKey, out var key)
@@ -109,7 +109,7 @@ internal sealed class IdempotencyMiddleware(
             Detail = "Idempotency-Key header is required for data-modifying operations (POST, PUT, PATCH)."
         });
     }
-    
+
     private static string GetPartitionKey(HttpContext context)
     {
         // Create partition key for cache isolation - use authenticated user ID or IP address.
@@ -169,7 +169,7 @@ internal sealed class IdempotencyMiddleware(
         {
             context.Response.Headers[kv.Key] = kv.Value;
         }
-            
+
         context.Response.Headers[IdempotencyHeaders.IdempotencyReplay] = "true";
         await context.Response.WriteAsync(cachedResponse.Body);
     }

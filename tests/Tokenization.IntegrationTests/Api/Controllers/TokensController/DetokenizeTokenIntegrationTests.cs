@@ -1,6 +1,6 @@
-using FluentAssertions;
 using System.Net;
 using System.Text.Json;
+using FluentAssertions;
 using Tokenization.Api.Idempotency;
 using Tokenization.Api.Responses;
 using Tokenization.Tests.Shared.Fixtures;
@@ -24,7 +24,7 @@ public class DetokenizeTokenIntegrationTests(WebApplicationFactoryFixture factor
         var client = factory.CreateClient();
         var createRequest = TestCreateTokenRequest.Valid();
         client.DefaultRequestHeaders.Add(IdempotencyHeaders.IdempotencyKey, Guid.NewGuid().ToString());
-        
+
         var createResponse = await client.PostAsJsonAsync("/api/v1/tokens", createRequest);
         createResponse.StatusCode.Should().Be(HttpStatusCode.Created, "token must be created successfully before detokenizing");
         var createdToken = JsonSerializer.Deserialize<CreateTokenResponse>(
@@ -52,7 +52,7 @@ public class DetokenizeTokenIntegrationTests(WebApplicationFactoryFixture factor
         // Arrange
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Add(IdempotencyHeaders.IdempotencyKey, Guid.NewGuid().ToString());
-        
+
         const string nonExistentToken = "tok_nonexistent789";
 
         // Act

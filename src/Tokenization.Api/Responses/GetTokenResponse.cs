@@ -32,7 +32,7 @@ public sealed record GetTokenResponse
     /// May be null if the network could not be determined during tokenization.
     /// </summary>
     public string? Network { get; init; }
-    
+
     /// <summary>
     /// The customer ID associated with the token.
     /// </summary>

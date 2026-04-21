@@ -32,7 +32,7 @@ internal sealed class DbHealthCheck(
 
             // Test basic connectivity by checking if we can access the database
             var canConnect = await dbContext.Database.CanConnectAsync(cancellationToken);
-            
+
             stopwatch.Stop();
 
             if (!canConnect)
@@ -57,7 +57,7 @@ internal sealed class DbHealthCheck(
                     data: data);
             }
 
-            logger.LogDebug("Database health check completed successfully in {ElapsedMs}ms", 
+            logger.LogDebug("Database health check completed successfully in {ElapsedMs}ms",
                 stopwatch.ElapsedMilliseconds);
 
             return HealthCheckResult.Healthy("Database is accessible and responsive", data);

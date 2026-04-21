@@ -19,7 +19,7 @@ internal sealed class EncryptionService(IKeyProvider keyProvider, string keyName
     public async Task<EncryptedPayload> EncryptAsync(string plaintext, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(plaintext)) throw new ArgumentException("Plaintext is required.");
-        
+
         // 1) Generate a fresh DEK
         var dek = RandomNumberGenerator.GetBytes(DekSizeBytes);
 
@@ -79,7 +79,7 @@ internal sealed class EncryptionService(IKeyProvider keyProvider, string keyName
             {
                 // Zero out the DEK
                 Array.Clear(dek);
-            } 
+            }
         }
     }
 }

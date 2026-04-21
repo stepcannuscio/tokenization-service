@@ -1,8 +1,8 @@
+using System.Security.Cryptography;
+using DotNet.Testcontainers.Builders;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using System.Security.Cryptography;
-using DotNet.Testcontainers.Builders;
 using Testcontainers.MsSql;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Infrastructure.Db;
@@ -50,7 +50,7 @@ public sealed class SqlServerFixture : IAsyncLifetime
         {
             throw SkipException.ForSkip("Docker is required for integration tests. Start Docker and rerun the integration suite.");
         }
-        
+
         // Create a single test database that will be reused
         _testDbName = $"TestDb_{Guid.NewGuid():N}";
         await using (var conn = new SqlConnection(_connectionStr))
@@ -72,9 +72,9 @@ public sealed class SqlServerFixture : IAsyncLifetime
                 using var hmac = new HMACSHA256(testKey);
                 return Task.FromResult(hmac.ComputeHash(data));
             });
-        
+
         _blindIndexService = new BlindIndexService(keyProvider.Object, "blind-index-key");
-        
+
         // Ensure the database schema exists
         await EnsureDatabaseSchemaAsync();
     }
@@ -120,16 +120,16 @@ public sealed class SqlServerFixture : IAsyncLifetime
             .Options;
 
         var ctx = new TokensDbContext(opts);
-        
+
         // Ensure database schema is up to date
         await ctx.Database.EnsureCreatedAsync();
-        
+
         // Clean up any existing data before the test starts
         await CleanupTestDataAsync(ctx);
 
         return new DbScope(ctx, _blindIndexService!, testConnectionString);
     }
-    
+
     internal static async Task CleanupTestDataAsync(TokensDbContext context)
     {
         try

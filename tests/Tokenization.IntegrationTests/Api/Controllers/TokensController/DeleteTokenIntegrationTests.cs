@@ -1,6 +1,6 @@
-using FluentAssertions;
 using System.Net;
 using System.Text.Json;
+using FluentAssertions;
 using Tokenization.Api.Idempotency;
 using Tokenization.Api.Responses;
 using Tokenization.Tests.Shared.Fixtures;
@@ -24,7 +24,7 @@ public class DeleteTokenIntegrationTests(WebApplicationFactoryFixture factory)
         var client = factory.CreateClient();
         var createRequest = TestCreateTokenRequest.Valid();
         client.DefaultRequestHeaders.Add(IdempotencyHeaders.IdempotencyKey, Guid.NewGuid().ToString());
-        
+
         var createResponse = await client.PostAsJsonAsync("/api/v1/tokens", createRequest);
         var createdToken = JsonSerializer.Deserialize<CreateTokenResponse>(
             await createResponse.Content.ReadAsStringAsync(), _jsonOptions);

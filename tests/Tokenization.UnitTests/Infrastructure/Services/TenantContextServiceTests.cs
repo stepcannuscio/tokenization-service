@@ -1,11 +1,11 @@
+using System.Security.Claims;
 using FluentAssertions;
-using Tokenization.Domain.Exceptions;
-using Tokenization.Infrastructure.Authorization;
-using Tokenization.Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Security.Claims;
+using Tokenization.Domain.Exceptions;
+using Tokenization.Infrastructure.Authorization;
+using Tokenization.Infrastructure.Services;
 using Xunit;
 
 namespace Tokenization.Tests.Unit.Infrastructure.Services;

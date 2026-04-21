@@ -23,9 +23,9 @@ public class KeyPreloaderHostedServiceTests
         var service = new KeyPreloaderHostedService(logger.Object, _keys, keyProvider.Object);
 
         var cancelled = new CancellationToken(canceled: true);
-        
+
         await service.StartAsync(cancelled);
-        
+
         keyProvider.Verify(p => p.PreloadKeysAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -35,7 +35,7 @@ public class KeyPreloaderHostedServiceTests
         var logger = MockLogger();
         var keyProvider = new Mock<IKeyProvider>(MockBehavior.Strict);
         keyProvider.Setup(p => p.PreloadKeysAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-        
+
         var service = new KeyPreloaderHostedService(logger.Object, _keys, keyProvider.Object);
 
         await service.StartAsync(CancellationToken.None);
@@ -50,7 +50,7 @@ public class KeyPreloaderHostedServiceTests
             It.IsAny<Exception?>(),
             It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Exactly(_keys.Count));
-        
+
         logger.Verify(l => l.Log(
             LogLevel.Error,
             It.IsAny<EventId>(),

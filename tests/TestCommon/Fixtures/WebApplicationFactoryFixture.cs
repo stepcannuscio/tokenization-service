@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Tokenization.Tests.Shared.Utils.Authentication;
 using Xunit;
 

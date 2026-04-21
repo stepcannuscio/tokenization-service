@@ -16,14 +16,14 @@ public sealed class HybridCacheFixtureInMemory : IDisposable
         _provider = services.BuildServiceProvider();
         Cache = _provider.GetRequiredService<HybridCache>();
     }
-    
+
     public void SetValidCache()
     {
         var services = GetServices();
         _provider = services.BuildServiceProvider();
         Cache = _provider.GetRequiredService<HybridCache>();
     }
-    
+
     public void SetInvalidCache()
     {
         var services = GetServices();
@@ -33,11 +33,11 @@ public sealed class HybridCacheFixtureInMemory : IDisposable
         mock.Setup(c => c.TryGetValue(It.IsAny<object>(), out result))
             .Throws<InvalidOperationException>();
         services.AddSingleton(mock.Object);
-        
+
         _provider = services.BuildServiceProvider();
         Cache = _provider.GetRequiredService<HybridCache>();
     }
-    
+
     private static ServiceCollection GetServices()
     {
         var services = new ServiceCollection();
