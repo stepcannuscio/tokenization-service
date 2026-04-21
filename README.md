@@ -76,9 +76,11 @@ For local development only, `appsettings.Development.example.json` enables a sim
 
 This path is intentionally development-only and should never be enabled outside `Development`.
 
-## Sample API Call
+## Sample API Calls
 
-Create a token with the same headers shown in Swagger:
+All examples use the local development bearer token configured in Quick Start step 2.
+
+### Create a token
 
 ```bash
 curl -k https://localhost:7182/api/v1/tokens \
@@ -102,13 +104,67 @@ curl -k https://localhost:7182/api/v1/tokens \
   }'
 ```
 
-Example response:
+```json
+{
+  "token": "c92123fec6a945ef98b022baae517776",
+  "maskedData": "************1111",
+  "last4": "1111",
+  "paymentMethodType": "Card",
+  "network": "Visa"
+}
+```
+
+### Get a token
+
+```bash
+curl -k https://localhost:7182/api/v1/tokens/c92123fec6a945ef98b022baae517776 \
+  -H "Authorization: Bearer local-dev-token" \
+  -H "X-API-Version: 1.0"
+```
 
 ```json
 {
-  "token": "tok_01JW3H6X6S0S5F6M4H0C5J0G8D",
+  "token": "c92123fec6a945ef98b022baae517776",
   "maskedData": "************1111",
   "last4": "1111",
+  "paymentMethodType": "Card",
+  "network": "Visa",
+  "customerId": "customer-123",
+  "tenantId": "demo-tenant",
+  "createdAt": "2026-04-21T10:00:00+00:00",
+  "expiresAt": null,
+  "maxUses": 1,
+  "usageCount": 0
+}
+```
+
+### Delete a token
+
+```bash
+curl -k https://localhost:7182/api/v1/tokens/c92123fec6a945ef98b022baae517776 \
+  -X DELETE \
+  -H "Authorization: Bearer local-dev-token" \
+  -H "X-API-Version: 1.0"
+```
+
+Returns `204 No Content` on success.
+
+### Detokenize
+
+```bash
+curl -k https://localhost:7182/api/v1/tokens/c92123fec6a945ef98b022baae517776/detokenize \
+  -X POST \
+  -H "Authorization: Bearer local-dev-token" \
+  -H "Idempotency-Key: 22222222-2222-2222-2222-222222222222" \
+  -H "X-API-Version: 1.0"
+```
+
+```json
+{
+  "pan": "4111111111111111",
+  "expMonth": 12,
+  "expYear": 2030,
+  "cardholderName": "Alex Example",
   "paymentMethodType": "Card",
   "network": "Visa"
 }
