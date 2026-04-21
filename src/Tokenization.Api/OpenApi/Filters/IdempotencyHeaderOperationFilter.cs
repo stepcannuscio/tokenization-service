@@ -1,6 +1,6 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Tokenization.Api.Idempotency;
 
@@ -17,14 +17,14 @@ internal sealed class IdempotencyHeaderOperationFilter : IOperationFilter
         if (httpMethod is null) return;
         if (!httpMethod.HttpMethods.Any(IdempotencyMiddleware.IsDataModifying)) return;
 
-        operation.Parameters ??= new List<OpenApiParameter>();
+        operation.Parameters ??= [];
         operation.Parameters.Add(new OpenApiParameter
         {
             Name = IdempotencyHeaders.IdempotencyKey,
             In = ParameterLocation.Header,
             Required = true,
             Description = "Unique key to ensure idempotent operations. Use a UUID or other unique identifier.",
-            Schema = new OpenApiSchema { Type = "string", Format = "uuid" }
+            Schema = new OpenApiSchema { Type = JsonSchemaType.String, Format = "uuid" }
         });
     }
 }

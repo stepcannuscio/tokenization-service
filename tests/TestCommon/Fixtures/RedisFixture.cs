@@ -13,8 +13,7 @@ public sealed class RedisFixture : IAsyncLifetime
     {
         try
         {
-            _container = new RedisBuilder()
-                .WithImage("redis:7-alpine")
+            _container = new RedisBuilder("redis:7-alpine")
                 .WithPortBinding(6379, true)
                 .Build();
 

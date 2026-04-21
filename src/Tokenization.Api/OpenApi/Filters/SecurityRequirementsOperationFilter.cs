@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
@@ -19,14 +19,7 @@ internal sealed class SecurityRequirementsOperationFilter : IOperationFilter
         {
             new()
             {
-                [new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                }] = Array.Empty<string>()
+                [new OpenApiSecuritySchemeReference("Bearer", null!, null!)] = []
             }
         };
     }

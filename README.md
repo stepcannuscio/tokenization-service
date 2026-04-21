@@ -1,6 +1,6 @@
 # Tokenization Service
 
-A portfolio-ready .NET 9 backend that tokenizes payment credentials with tenant isolation, envelope encryption, idempotency, health checks, and a testable layered architecture.
+A portfolio-ready .NET 10 backend that tokenizes payment credentials with tenant isolation, envelope encryption, idempotency, health checks, and a testable layered architecture.
 
 ## What This Is
 
@@ -20,7 +20,7 @@ This project is intentionally scoped as a focused backend service, not a full pa
 
 ### Prerequisites
 
-- .NET SDK `9.0.305` or compatible `9.0.x` feature band
+- .NET SDK `10.0.102` or compatible `10.0.x` feature band
 - Docker Desktop or another Docker runtime
 
 ### 1. Start local dependencies

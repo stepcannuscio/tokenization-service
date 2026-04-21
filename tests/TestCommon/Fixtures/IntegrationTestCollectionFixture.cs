@@ -63,7 +63,7 @@ public sealed class IntegrationTestCollectionFixture : IAsyncLifetime
             try
             {
                 _reuseSqlContainer = SqlServerTestDependency.ShouldReuseContainers();
-                var builder = new MsSqlBuilder()
+                var builder = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
                     .WithReuse(_reuseSqlContainer);
 
                 if (!_reuseSqlContainer)

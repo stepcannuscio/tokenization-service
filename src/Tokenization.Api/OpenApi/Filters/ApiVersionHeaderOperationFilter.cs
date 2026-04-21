@@ -1,5 +1,4 @@
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Tokenization.Api.Versioning;
 
@@ -25,8 +24,7 @@ internal sealed class ApiVersionHeaderOperationFilter : IOperationFilter
             Description = "Optional API version header. The v1 routes also work without this header.",
             Schema = new OpenApiSchema
             {
-                Type = "string",
-                Example = new OpenApiString("1.0")
+                Type = JsonSchemaType.String
             }
         });
     }

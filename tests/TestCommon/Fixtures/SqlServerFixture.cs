@@ -33,7 +33,7 @@ public sealed class SqlServerFixture : IAsyncLifetime
             else
             {
                 _reuseContainer = SqlServerTestDependency.ShouldReuseContainers();
-                var builder = new MsSqlBuilder()
+                var builder = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
                     .WithReuse(_reuseContainer);
 
                 if (!_reuseContainer)
