@@ -96,8 +96,9 @@ internal sealed class DatabaseOptions
     public int SlowQueryThresholdMs { get; set; } = 1000;
     
     /// <summary>
-    /// If certificate validation should be bypassed.
-    /// Should only be used for development.
+    /// Optional override for SQL Server certificate trust behavior.
+    /// When unset, any value already present in the connection string is preserved.
+    /// Should only be used for development when set to <c>true</c>.
     /// </summary>
-    public bool TrustServerCertificate { get; set; } = false;
+    public bool? TrustServerCertificate { get; set; }
 }

@@ -46,6 +46,8 @@ The checked-in development example is already configured for:
 - the in-memory key provider
 - development-only bearer auth so you can call the API immediately
 
+For SQL Server, `Database:TrustServerCertificate` is an optional explicit override. If you already include `TrustServerCertificate=True` in `Database:ConnectionString` for the local compose container, the app now honors that value without requiring a second config flag.
+
 ### 3. Run the API
 
 ```bash
@@ -105,7 +107,7 @@ Example response:
 ```json
 {
   "token": "tok_01JW3H6X6S0S5F6M4H0C5J0G8D",
-  "maskedData": "411111******1111",
+  "maskedData": "************1111",
   "last4": "1111",
   "paymentMethodType": "Card",
   "network": "Visa"
@@ -154,6 +156,3 @@ The API layer owns transport concerns, the application layer coordinates use cas
 - Integration tests use Testcontainers for realism, which makes Docker a deliberate dependency for that suite.
 - The project focuses on readability and security-conscious patterns over maximizing feature breadth.
 
-## License
-
-MIT. See [LICENSE](LICENSE).

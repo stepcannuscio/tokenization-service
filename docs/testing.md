@@ -37,6 +37,8 @@ The infrastructure-focused integration tests still use Testcontainers for SQL Se
 
 When the local development SQL Server from `docker compose up -d` is already available on `localhost,14333`, the SQL-backed fixtures will reuse it instead of cold-starting a fresh SQL container. If that local dependency is not available, the fixtures fall back to Testcontainers automatically.
 
+For local compose SQL Server, `Database:TrustServerCertificate` is an optional override. If your development connection string already includes `TrustServerCertificate=True`, the runtime preserves that value and you do not need to duplicate it as a separate setting.
+
 Typical local flow:
 
 ```bash

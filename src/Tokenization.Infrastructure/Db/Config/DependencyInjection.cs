@@ -78,7 +78,7 @@ internal static class DependencyInjection
         return services;
     }
 
-    private static string BuildResilientConnectionString(DatabaseOptions options)
+    internal static string BuildResilientConnectionString(DatabaseOptions options)
     {
         var connectionStringBuilder = new SqlConnectionStringBuilder(options.ConnectionString)
         {
@@ -89,14 +89,29 @@ internal static class DependencyInjection
             ConnectRetryCount = options.MaxRetryCount,
             ConnectRetryInterval = options.MaxRetryDelaySeconds,
             Encrypt = true,
-            TrustServerCertificate = options.TrustServerCertificate,
             MultipleActiveResultSets = false,
             PersistSecurityInfo = false,
             ApplicationName = "TokenizationApi",
             Pooling = true
         };
 
+        if (options.TrustServerCertificate.HasValue)
+        {
+            connectionStringBuilder.TrustServerCertificate = options.TrustServerCertificate.Value;
+        }
+        else if (!HasTrustServerCertificateSetting(connectionStringBuilder))
+        {
+            // Preserve provider defaults when neither config path specifies the setting.
+            connectionStringBuilder.Remove("TrustServerCertificate");
+        }
+
         return connectionStringBuilder.ConnectionString;
+    }
+
+    private static bool HasTrustServerCertificateSetting(SqlConnectionStringBuilder connectionStringBuilder)
+    {
+        return connectionStringBuilder.ContainsKey("TrustServerCertificate") ||
+               connectionStringBuilder.ContainsKey("Trust Server Certificate");
     }
 
     internal static async Task InitializeTokenizationDatabaseAsync(this WebApplication app)
