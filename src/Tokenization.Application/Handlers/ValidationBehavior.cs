@@ -12,13 +12,6 @@ internal sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValid
     : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    /// <summary>Executes all validators and throws exception when failures exist.</summary>
-    /// <typeparam name="TResponse">Response type.</typeparam>
-    /// <param name="request"><see cref="TRequest"/> to validate.</param>
-    /// <param name="next">Delegate for next action in the pipeline.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>A <see cref="TResponse"/> object.</returns>
-    /// <exception cref="ValidationException">Thrown when any validator contains a failure.</exception>
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken ct)
     {
         if (!validators.Any()) return await next(ct);

@@ -1,31 +1,65 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using Tokenization.Api.Config.Options;
+using Tokenization.Api.Authentication.Development;
 using Tokenization.Infrastructure.Authorization;
 
 namespace Tokenization.Api.Config;
 
-/// <summary>
-/// DI registration for the api layer.
-/// </summary>
 internal static class DependencyInjection
 {
-    /// <summary>
-    /// Configures authentication and authorization services.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="configuration">The configuration.</param>
-    public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
+    private const string AuthenticationScheme = "TokenizationAuthentication";
+
+    public static void AddTokenizationAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         services.AddHttpContextAccessor();
 
         var authOptions = configuration.GetSection(AuthOptions.SectionName).Get<AuthOptions>() ?? new AuthOptions();
+        var developmentAuthOptions = configuration.GetSection(DevelopmentAuthOptions.SectionName).Get<DevelopmentAuthOptions>() ??
+                                     new DevelopmentAuthOptions();
         var securityOptions = configuration.GetSection(SecurityOptions.SectionName).Get<SecurityOptions>() ??
                               new SecurityOptions();
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddOptions<DevelopmentAuthOptions>()
+            .Bind(configuration.GetSection(DevelopmentAuthOptions.SectionName))
+            .Validate(options => !options.Enabled || environment.IsDevelopment(),
+                "Development auth can only be enabled in the Development environment.")
+            .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.BearerToken),
+                "Development auth requires a non-empty bearer token.")
+            .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.TenantId),
+                "Development auth requires a tenant ID.")
+            .ValidateOnStart();
+
+        services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = AuthenticationScheme;
+                options.DefaultChallengeScheme = AuthenticationScheme;
+                options.DefaultScheme = AuthenticationScheme;
+            })
+            .AddPolicyScheme(AuthenticationScheme, AuthenticationScheme, options =>
+            {
+                options.ForwardDefaultSelector = _ =>
+                    environment.IsDevelopment() && developmentAuthOptions.Enabled
+                        ? DevelopmentAuthHandler.SchemeName
+                        : JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddScheme<DevelopmentAuthSchemeOptions, DevelopmentAuthHandler>(
+                DevelopmentAuthHandler.SchemeName,
+                options =>
+                {
+                    options.Enabled = environment.IsDevelopment() && developmentAuthOptions.Enabled;
+                    options.BearerToken = developmentAuthOptions.BearerToken;
+                    options.UserId = developmentAuthOptions.UserId;
+                    options.TenantId = developmentAuthOptions.TenantId;
+                    options.Scopes = developmentAuthOptions.Scopes;
+                    options.Roles = developmentAuthOptions.Roles;
+                })
             .AddJwtBearer(options =>
             {
                 options.Authority = authOptions.Authority;
@@ -38,8 +72,6 @@ internal static class DependencyInjection
                     ValidateIssuerSigningKey = true,
                     ClockSkew = TimeSpan.FromMinutes(securityOptions.JwtClockSkewMinutes)
                 };
-                
-                // Configure events to normalize tenant claims for downstream access checks.
                 options.Events = new JwtBearerEvents
                 {
                     OnTokenValidated = context =>
@@ -62,11 +94,6 @@ internal static class DependencyInjection
             });
     }
 
-    /// <summary>
-    /// Configures CORS with strict security policies.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="configuration">The configuration.</param>
     public static void AddTokenizationCors(this IServiceCollection services, IConfiguration configuration)
     {
         var corsOptions = configuration.GetSection(CorsOptions.SectionName).Get<CorsOptions>() ?? new CorsOptions();
@@ -83,38 +110,27 @@ internal static class DependencyInjection
         });
     }
 
-    /// <summary>
-    /// Configures essential security services using built-in ASP.NET Core features.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="configuration">The configuration.</param>
     public static void AddTokenizationSecurity(this IServiceCollection services, IConfiguration configuration)
     {
         var securityOptions = configuration.GetSection(SecurityOptions.SectionName).Get<SecurityOptions>() ??
                               new SecurityOptions();
         
-        // Configure HTTPS redirection and HSTS
         services.AddHttpsRedirection(o => o.HttpsPort = securityOptions.HttpsPort);
         services.AddHsts(o =>
         {
             o.MaxAge = TimeSpan.FromDays(securityOptions.HstsMaxAgeDays);
         });
         
-        // Add built-in CSRF protection
         services.AddAntiforgery();
     }
 
-    /// <summary>
-    /// Configures request size hardening for security protection against DoS attacks.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="configuration">The configuration.</param>
-    public static void AddTokenizationRequestSizeHardening(this IServiceCollection services, IConfiguration configuration)
+    public static void AddTokenizationRequestSizeHardening(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         var requestSizeOptions = configuration.GetSection(RequestSizeOptions.SectionName).Get<RequestSizeOptions>() ??
                                  new RequestSizeOptions();
 
-        // Configure form options for multipart and form data limits
         services.Configure<FormOptions>(options =>
         {
             options.MultipartBodyLengthLimit = requestSizeOptions.MultipartBodyLengthLimit;
@@ -123,18 +139,12 @@ internal static class DependencyInjection
             options.ValueCountLimit = requestSizeOptions.MaxFormFieldCount;
         });
 
-        // Configure Kestrel server options for overall request body size
         services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
         {
             options.Limits.MaxRequestBodySize = requestSizeOptions.MaxRequestBodySize;
         });
     }
 
-    /// <summary>
-    /// Extracts the canonical tenant ID from supported claim aliases.
-    /// </summary>
-    /// <param name="principal">The authenticated user's claims principal.</param>
-    /// <returns>The tenant ID if found; otherwise, <c>null</c>.</returns>
     private static string? ExtractTenantIdFromClaims(ClaimsPrincipal? principal)
     {
         if (principal?.Identity?.IsAuthenticated != true)

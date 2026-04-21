@@ -19,7 +19,7 @@ internal sealed class BulkOperationsService(TokensDbContext dbContext, ILogger<B
     /// <returns>Number of entities inserted.</returns>
     /// <exception cref="DbUpdateException">Thrown when the database save fails.</exception>
     /// <exception cref="DbUpdateConcurrencyException">Thrown when the database save fails due to a concurrency violation.</exception>
-    /// <exception cref="OperationCanceledException">Thrown if the operation is canceled via <paramref name="ct"/>.</exception>
+    /// <exception cref="OperationCanceledException">Thrown if the operation is canceled via <paramref name="cancellationToken"/>.</exception>
     public async Task<int> BulkInsertAsync<T>(
         IEnumerable<T> entities,
         int batchSize = 1000,
@@ -74,7 +74,7 @@ internal sealed class BulkOperationsService(TokensDbContext dbContext, ILogger<B
     /// <param name="parameters">SQL parameters.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Number of rows affected.</returns>
-    /// <exception cref="OperationCanceledException">Thrown if the operation is canceled via <paramref name="ct"/>.</exception>
+    /// <exception cref="OperationCanceledException">Thrown if the operation is canceled via <paramref name="cancellationToken"/>.</exception>
     public async Task<int> BulkUpdateAsync(
         string updateExpression,
         object[] parameters,

@@ -2,12 +2,14 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Security.Cryptography;
+using DotNet.Testcontainers.Builders;
 using Testcontainers.MsSql;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Infrastructure.Db;
 using Tokenization.Infrastructure.Db.BlindIndex;
 using Tokenization.Infrastructure.Db.Interceptors;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Tokenization.Tests.Shared.Fixtures;
 
@@ -20,9 +22,16 @@ public sealed class SqlServerFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        _container = new MsSqlBuilder().Build();
-        await _container.StartAsync();
-        _connectionStr = _container.GetConnectionString();
+        try
+        {
+            _container = new MsSqlBuilder().Build();
+            await _container.StartAsync();
+            _connectionStr = _container.GetConnectionString();
+        }
+        catch (DockerUnavailableException)
+        {
+            throw SkipException.ForSkip("Docker is required for integration tests. Start Docker and rerun the integration suite.");
+        }
         
         // Create a single test database that will be reused
         _testDbName = $"TestDb_{Guid.NewGuid():N}";

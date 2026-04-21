@@ -12,23 +12,12 @@ namespace Tokenization.Infrastructure.Db;
 /// </summary>
 internal sealed class TokensDbContext : DbContext
 {
-    /// <summary>
-    /// Initializes the context with options and the blind-index interceptor.
-    /// </summary>
-    /// <param name="options">DbContext options.</param>
     public TokensDbContext(DbContextOptions<TokensDbContext> options) : base(options)
     {
-        Database.EnsureCreated();
     }
 
-    /// <summary>
-    /// Token records (encrypted PAN/PII via <see cref="TokenRecord.EncryptedPayload"/>).
-    /// </summary>
     public DbSet<TokenRecord> Tokens => Set<TokenRecord>();
 
-    /// <summary>
-    /// Applies entity configurations.
-    /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(TokensDbContext).Assembly);
 }

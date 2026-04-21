@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Tokenization.Tests.Shared.Utils.Authentication;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Tokenization.Tests.Shared.Fixtures;
 
@@ -40,6 +41,11 @@ public class WebApplicationFactoryFixture : WebApplicationFactory<Program>, IAsy
         }
         catch (Exception ex)
         {
+            if (ex is SkipException)
+            {
+                throw;
+            }
+
             await CleanupAsync();
             throw new InvalidOperationException("Failed to initialize test infrastructure", ex);
         }

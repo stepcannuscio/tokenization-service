@@ -5,14 +5,14 @@ using System.Reflection;
 
 namespace Tokenization.Api.OpenApi.Filters;
 
-/// <summary>
-/// Operation filter to add security requirements.
-/// </summary>
 internal sealed class SecurityRequirementsOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        var authAttributes = context.MethodInfo.GetCustomAttributes<AuthorizeAttribute>();
+        var authAttributes = context.MethodInfo.GetCustomAttributes<AuthorizeAttribute>(inherit: true)
+            .Concat(context.MethodInfo.DeclaringType?.GetCustomAttributes<AuthorizeAttribute>(inherit: true) ??
+                    []);
+
         if (!authAttributes.Any()) return;
 
         operation.Security = new List<OpenApiSecurityRequirement>

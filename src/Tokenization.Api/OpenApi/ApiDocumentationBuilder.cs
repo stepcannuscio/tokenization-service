@@ -1,20 +1,24 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
+using Tokenization.Api.Config.Options;
 using Tokenization.Api.OpenApi.Filters;
 
 namespace Tokenization.Api.OpenApi;
 
-/// <summary>
-/// Configures OpenAPI documentation with comprehensive API standards.
-/// </summary>
 internal static class ApiDocumentationBuilder
 {
-    /// <summary>
-    /// Configures Swagger with comprehensive API documentation standards.
-    /// </summary>
-    public static void ConfigureSwagger(SwaggerGenOptions options)
+    public static void ConfigureSwagger(
+        SwaggerGenOptions options,
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
+        var developmentAuthOptions = configuration.GetSection(DevelopmentAuthOptions.SectionName).Get<DevelopmentAuthOptions>() ??
+                                     new DevelopmentAuthOptions();
+        var authDescription = environment.IsDevelopment() && developmentAuthOptions.Enabled
+            ? $"Development mode: send `Authorization: Bearer {developmentAuthOptions.BearerToken}`."
+            : "Production mode: send a JWT bearer token issued by the configured OIDC provider.";
+
         options.SwaggerDoc("v1", new OpenApiInfo
         {
             Title = "Tokenization Service API",
@@ -22,6 +26,7 @@ internal static class ApiDocumentationBuilder
             Description = """
                           A standalone payment tokenization service with tenant isolation,
                           envelope encryption, health checks, and operational safeguards.
+                          Use Idempotency-Key on write endpoints. Versioning is available in the path and via X-API-Version.
                           """,
             Contact = new OpenApiContact
             {
@@ -35,10 +40,9 @@ internal static class ApiDocumentationBuilder
             Type = SecuritySchemeType.Http,
             Scheme = "bearer",
             BearerFormat = "JWT",
-            Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
+            Description = $"{authDescription} Example: \"Authorization: Bearer <token>\""
         });
 
-        // Add global security requirement
         options.AddSecurityRequirement(new OpenApiSecurityRequirement
         {
             {
@@ -54,7 +58,6 @@ internal static class ApiDocumentationBuilder
             }
         });
 
-        // Add XML comments
         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         if (File.Exists(xmlPath))
@@ -62,11 +65,11 @@ internal static class ApiDocumentationBuilder
             options.IncludeXmlComments(xmlPath);
         }
 
-        // Add custom schema filters
         options.SchemaFilter<EnumSchemaFilter>();
+        options.SchemaFilter<ExampleSchemaFilter>();
 
-        // Add operation filters
         options.OperationFilter<SecurityRequirementsOperationFilter>();
         options.OperationFilter<IdempotencyHeaderOperationFilter>();
+        options.OperationFilter<ApiVersionHeaderOperationFilter>();
     }
 }

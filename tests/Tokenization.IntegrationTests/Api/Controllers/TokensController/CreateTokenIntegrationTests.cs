@@ -47,7 +47,7 @@ public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         response.Headers.Location.Should().NotBeNull();
-        response.Headers.Location!.ToString().Should().StartWith("/tokens/");
+        response.Headers.Location!.ToString().Should().StartWith("/api/v");
 
         var tokenResponse = JsonSerializer.Deserialize<CreateTokenResponse>(responseContent, _jsonOptions);
         tokenResponse.Should().NotBeNull();

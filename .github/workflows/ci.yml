@@ -1,0 +1,85 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore TokenizationService.sln
+
+      - name: Build
+        run: dotnet build TokenizationService.sln --configuration Release --no-restore
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore TokenizationService.sln
+
+      - name: Run unit tests
+        run: dotnet test tests/Tokenization.UnitTests/Tokenization.UnitTests.csproj --configuration Release --no-restore --logger "trx;LogFileName=unit-tests.trx" --results-directory ./TestResults/unit --collect:"XPlat Code Coverage"
+
+      - name: Install reportgenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Create coverage summary
+        run: reportgenerator -reports:"TestResults/unit/**/coverage.cobertura.xml" -targetdir:"TestResults/unit/coverage-report" -reporttypes:"MarkdownSummaryGithub;TextSummary"
+
+      - name: Publish coverage summary
+        run: |
+          cat TestResults/unit/coverage-report/Summary.md >> "$GITHUB_STEP_SUMMARY"
+          cat TestResults/unit/coverage-report/Summary.txt
+
+      - name: Upload unit test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: TestResults/unit
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore TokenizationService.sln
+
+      - name: Run integration tests
+        run: dotnet test tests/Tokenization.IntegrationTests/Tokenization.IntegrationTests.csproj --configuration Release --no-restore --logger "trx;LogFileName=integration-tests.trx" --results-directory ./TestResults/integration
+
+      - name: Upload integration test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: TestResults/integration

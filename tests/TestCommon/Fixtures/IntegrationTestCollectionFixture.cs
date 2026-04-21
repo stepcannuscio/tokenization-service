@@ -1,6 +1,8 @@
+using DotNet.Testcontainers.Builders;
 using Testcontainers.MsSql;
 using Testcontainers.Redis;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Tokenization.Tests.Shared.Fixtures;
 
@@ -53,25 +55,30 @@ public sealed class IntegrationTestCollectionFixture : IAsyncLifetime
                 return;
             }
 
-            // Create and start containers
-            _sqlServerContainer = new MsSqlBuilder()
-                .WithName($"tokenization-sqlserver-{Guid.NewGuid():N}")
-                .Build();
-
-            _redisContainer = new RedisBuilder()
-                .WithImage("redis:7-alpine")
-                .WithName($"tokenization-redis-{Guid.NewGuid():N}")
-                .WithPortBinding(6379, true)
-                .Build();
-
-            // Start containers in parallel
-            var startTasks = new List<Task>
+            try
             {
-                _sqlServerContainer.StartAsync(),
-                _redisContainer.StartAsync()
-            };
+                _sqlServerContainer = new MsSqlBuilder()
+                    .WithName($"tokenization-sqlserver-{Guid.NewGuid():N}")
+                    .Build();
 
-            await Task.WhenAll(startTasks);
+                _redisContainer = new RedisBuilder()
+                    .WithImage("redis:7-alpine")
+                    .WithName($"tokenization-redis-{Guid.NewGuid():N}")
+                    .WithPortBinding(6379, true)
+                    .Build();
+
+                var startTasks = new List<Task>
+                {
+                    _sqlServerContainer.StartAsync(),
+                    _redisContainer.StartAsync()
+                };
+
+                await Task.WhenAll(startTasks);
+            }
+            catch (DockerUnavailableException)
+            {
+                throw SkipException.ForSkip("Docker is required for integration tests. Start Docker and rerun the integration suite.");
+            }
 
             _sqlServerConnectionString = _sqlServerContainer.GetConnectionString();
             _redisConnectionString = _redisContainer.GetConnectionString();

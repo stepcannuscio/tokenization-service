@@ -86,8 +86,12 @@ public sealed class TokensController(
         var cmd = request.ToCreateTokenCommand(tenantContextService);
         var dto = await mediator.Send(cmd, ct);
         var response = dto.ToCreateTokenResponse(tenantContextService);
-        
-        return Created($"/tokens/{response.Token}", response);
+        var version = HttpContext.GetRequestedApiVersion()?.ToString() ?? "1.0";
+
+        return CreatedAtAction(
+            nameof(GetToken),
+            new { version, tokenId = response.Token },
+            response);
     }
     
     /// <summary>

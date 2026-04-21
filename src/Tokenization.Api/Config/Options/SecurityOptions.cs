@@ -10,6 +10,8 @@ internal sealed class SecurityOptions
     /// </summary>
     public const string SectionName = "Security";
     
+    public bool UseHttpsRedirection { get; init; } = true;
+    
     /// <summary>
     /// The HTTPS port for redirection.
     /// </summary>
