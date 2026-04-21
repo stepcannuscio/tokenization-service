@@ -101,6 +101,12 @@ internal sealed class InMemoryKeyProvider(IKeyClientCache<InMemoryKeyClient, byt
     /// <inheritdoc />
     public async Task PreloadKeysAsync(string keyName, CancellationToken ct = default)
     {
+        var existingClients = await cache.GetAllClientsAsync(keyName, ct);
+        if (existingClients.Count > 0)
+        {
+            return;
+        }
+
         var newClient = new InMemoryKeyClient(keyName, 1, true);
         await cache.SetClientsAsync(keyName, [newClient], ct);
     }

@@ -120,11 +120,13 @@ Fast unit suite:
 dotnet test tests/Tokenization.UnitTests/Tokenization.UnitTests.csproj
 ```
 
-Docker-backed integration suite:
+Integration suite:
 
 ```bash
 dotnet test tests/Tokenization.IntegrationTests/Tokenization.IntegrationTests.csproj
 ```
+
+The API-host integration tests use an in-memory SQLite database for a fast local loop, while the infrastructure-focused tests still exercise SQL Server and Redis through Docker-backed fixtures. If your local `docker compose` SQL Server is already running on `localhost,14333`, the SQL-backed fixtures reuse it for a faster warm-start loop; otherwise they fall back to Testcontainers automatically.
 
 Key Vault integration tests remain opt-in. Set `RUN_KEYVAULT_TESTS=true` and provide Key Vault configuration before running the integration suite.
 

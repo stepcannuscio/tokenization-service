@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+using Tokenization.Infrastructure.Db.Enums;
+
 namespace Tokenization.Infrastructure.Db.Config.Options;
 
 /// <summary>
@@ -17,6 +19,11 @@ internal sealed class DatabaseOptions
     /// </summary>
     [Required]
     public required string ConnectionString { get; set; }
+
+    /// <summary>
+    /// Database provider used by EF Core.
+    /// </summary>
+    public DatabaseProviderType Provider { get; set; } = DatabaseProviderType.SqlServer;
 
     /// <summary>
     /// Maximum retry count for transient failures.

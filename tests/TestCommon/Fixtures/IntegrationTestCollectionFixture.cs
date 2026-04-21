@@ -1,6 +1,5 @@
 using DotNet.Testcontainers.Builders;
 using Testcontainers.MsSql;
-using Testcontainers.Redis;
 using Xunit;
 using Xunit.Sdk;
 
@@ -26,12 +25,10 @@ public sealed class IntegrationTestCollectionFixture : IAsyncLifetime
     private static bool _isInitialized;
 
     private MsSqlContainer? _sqlServerContainer;
-    private RedisContainer? _redisContainer;
-    private string _sqlServerConnectionString = string.Empty;
-    private string _redisConnectionString = string.Empty;
+    private bool _reuseSqlContainer;
+    private static string _sqlServerConnectionString = string.Empty;
 
     public string SqlServerConnectionString => _sqlServerConnectionString;
-    public string RedisConnectionString => _redisConnectionString;
 
     public static IntegrationTestCollectionFixture Instance
     {
@@ -55,25 +52,27 @@ public sealed class IntegrationTestCollectionFixture : IAsyncLifetime
                 return;
             }
 
+            var localConnectionString = await SqlServerTestDependency.TryGetLocalComposeConnectionStringAsync();
+            if (!string.IsNullOrEmpty(localConnectionString))
+            {
+                _sqlServerConnectionString = localConnectionString;
+                _isInitialized = true;
+                return;
+            }
+
             try
             {
-                _sqlServerContainer = new MsSqlBuilder()
-                    .WithName($"tokenization-sqlserver-{Guid.NewGuid():N}")
-                    .Build();
+                _reuseSqlContainer = SqlServerTestDependency.ShouldReuseContainers();
+                var builder = new MsSqlBuilder()
+                    .WithReuse(_reuseSqlContainer);
 
-                _redisContainer = new RedisBuilder()
-                    .WithImage("redis:7-alpine")
-                    .WithName($"tokenization-redis-{Guid.NewGuid():N}")
-                    .WithPortBinding(6379, true)
-                    .Build();
-
-                var startTasks = new List<Task>
+                if (!_reuseSqlContainer)
                 {
-                    _sqlServerContainer.StartAsync(),
-                    _redisContainer.StartAsync()
-                };
+                    builder = builder.WithName($"tokenization-sqlserver-{Guid.NewGuid():N}");
+                }
 
-                await Task.WhenAll(startTasks);
+                _sqlServerContainer = builder.Build();
+                await _sqlServerContainer.StartAsync();
             }
             catch (DockerUnavailableException)
             {
@@ -81,7 +80,6 @@ public sealed class IntegrationTestCollectionFixture : IAsyncLifetime
             }
 
             _sqlServerConnectionString = _sqlServerContainer.GetConnectionString();
-            _redisConnectionString = _redisContainer.GetConnectionString();
 
             _isInitialized = true;
         }
@@ -103,16 +101,10 @@ public sealed class IntegrationTestCollectionFixture : IAsyncLifetime
 
             var disposeTasks = new List<Task>();
 
-            if (_sqlServerContainer != null)
+            if (_sqlServerContainer != null && !_reuseSqlContainer)
             {
                 disposeTasks.Add(_sqlServerContainer.StopAsync());
                 disposeTasks.Add(_sqlServerContainer.DisposeAsync().AsTask());
-            }
-
-            if (_redisContainer != null)
-            {
-                disposeTasks.Add(_redisContainer.StopAsync());
-                disposeTasks.Add(_redisContainer.DisposeAsync().AsTask());
             }
 
             if (disposeTasks.Count > 0)
@@ -120,6 +112,7 @@ public sealed class IntegrationTestCollectionFixture : IAsyncLifetime
                 await Task.WhenAll(disposeTasks);
             }
 
+            _reuseSqlContainer = false;
             _isInitialized = false;
             _instance = null;
         }

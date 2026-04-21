@@ -6,6 +6,7 @@ using Tokenization.Infrastructure.Config.Options;
 using Tokenization.Infrastructure.Crypto.Enums;
 using Tokenization.Infrastructure.Crypto.KeyVault.Config;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Tokenization.Tests.Shared.Fixtures;
 
@@ -27,18 +28,29 @@ public sealed class KeyVaultFixture : IAsyncLifetime
     
     public async Task InitializeAsync()
     {
+        if (!ShouldRunKeyVaultTests())
+        {
+            throw SkipException.ForSkip(
+                "Set RUN_KEYVAULT_TESTS=true and provide Key Vault configuration to run this test.");
+        }
+
         HybridCacheFixture = new HybridCacheFixture();
         await HybridCacheFixture.InitializeAsync();
 
-        IConfiguration configuration =
-            new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .Build();
+        IConfiguration configuration = BuildConfiguration();
 
         var keyStorage = configuration.GetSection(KeyStorageOptions.SectionName).Get<KeyStorageOptions>() ??
-                         throw new InvalidOperationException("Key storage configuration not found");
+                         throw SkipException.ForSkip(
+                             "Key Vault integration tests require KeyStorage settings via environment variables " +
+                             "or src/Tokenization.Api/appsettings.Development.json.");
+
+        if (string.IsNullOrWhiteSpace(keyStorage.VaultUrl) ||
+            string.IsNullOrWhiteSpace(keyStorage.KekKeyName) ||
+            string.IsNullOrWhiteSpace(keyStorage.BlindIndexKeyName))
+        {
+            throw SkipException.ForSkip(
+                "Key Vault integration tests require VaultUrl, KekKeyName, and BlindIndexKeyName.");
+        }
         
         VaultUrl = keyStorage.VaultUrl;
         KekKeyName = keyStorage.KekKeyName;
@@ -97,5 +109,49 @@ public sealed class KeyVaultFixture : IAsyncLifetime
         {
             await ServiceProvider.DisposeAsync();
         }
+    }
+
+    private static bool ShouldRunKeyVaultTests()
+    {
+        return string.Equals(
+            Environment.GetEnvironmentVariable("RUN_KEYVAULT_TESTS"),
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static IConfiguration BuildConfiguration()
+    {
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: false);
+
+        var repositoryRoot = FindRepositoryRoot();
+        if (repositoryRoot is not null)
+        {
+            builder.AddJsonFile(
+                Path.Combine(repositoryRoot, "src", "Tokenization.Api", "appsettings.Development.json"),
+                optional: true,
+                reloadOnChange: false);
+        }
+
+        return builder
+            .AddEnvironmentVariables()
+            .Build();
+    }
+
+    private static string? FindRepositoryRoot()
+    {
+        var current = new DirectoryInfo(AppContext.BaseDirectory);
+        while (current is not null)
+        {
+            if (File.Exists(Path.Combine(current.FullName, "TokenizationService.sln")))
+            {
+                return current.FullName;
+            }
+
+            current = current.Parent;
+        }
+
+        return null;
     }
 }

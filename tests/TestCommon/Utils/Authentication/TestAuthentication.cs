@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
@@ -53,5 +55,42 @@ internal class TestAuthorizationHandler(
         var ticket = new AuthenticationTicket(principal, "Test");
 
         return Task.FromResult(AuthenticateResult.Success(ticket));
+    }
+}
+
+internal static class TestAuthenticationExtensions
+{
+    public static IServiceCollection AddTestAuthentication(
+        this IServiceCollection services,
+        string schemeName,
+        Action<TestAuthenticationSchemeOptions>? configure = null)
+    {
+        services.RemoveAll<IConfigureOptions<AuthenticationOptions>>();
+        services.RemoveAll<IPostConfigureOptions<AuthenticationOptions>>();
+        services.RemoveAll<IAuthenticationSchemeProvider>();
+        services.RemoveAll<IAuthenticationHandlerProvider>();
+        services.RemoveAll<IAuthenticationService>();
+
+        services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = schemeName;
+                options.DefaultChallengeScheme = schemeName;
+                options.DefaultForbidScheme = schemeName;
+                options.DefaultScheme = schemeName;
+            })
+            .AddScheme<TestAuthenticationSchemeOptions, TestAuthorizationHandler>(schemeName, options =>
+            {
+                configure?.Invoke(options);
+            });
+
+        services.PostConfigureAll<AuthenticationOptions>(options =>
+        {
+            options.DefaultAuthenticateScheme = schemeName;
+            options.DefaultChallengeScheme = schemeName;
+            options.DefaultForbidScheme = schemeName;
+            options.DefaultScheme = schemeName;
+        });
+
+        return services;
     }
 }

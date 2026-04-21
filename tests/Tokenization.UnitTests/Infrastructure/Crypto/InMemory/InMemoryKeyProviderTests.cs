@@ -1,8 +1,12 @@
 using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System.Security.Cryptography;
+using Tokenization.Infrastructure.Caching;
+using Tokenization.Infrastructure.Crypto.Caching;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Infrastructure.Crypto.InMemory;
+using Tokenization.Tests.Shared.Fixtures;
 using Tokenization.Tests.Shared.Utils.Cache;
 using Xunit;
 
@@ -197,14 +201,34 @@ public class InMemoryKeyProviderTests
     }
 
     [Fact]
+    public async Task PreloadKeysAsync_ShouldNotReplaceExistingClients()
+    {
+        var key = TestCacheKey.New();
+        var existingClient = new InMemoryKeyClient(key, 1, true);
+        var existingClients = (IReadOnlyList<InMemoryKeyClient>)[existingClient];
+
+        var cache = new Mock<IKeyClientCache<InMemoryKeyClient, byte[]>>(MockBehavior.Strict);
+        cache.Setup(c => c.GetAllClientsAsync(key, CancellationToken.None)).ReturnsAsync(existingClients);
+
+        var provider = new InMemoryKeyProvider(cache.Object);
+
+        await provider.PreloadKeysAsync(key);
+
+        cache.Verify(
+            c => c.SetClientsAsync(
+                It.IsAny<string>(),
+                It.IsAny<IReadOnlyList<InMemoryKeyClient>>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
     public async Task ReloadKeysAsync_IsNoOp_And_DoesNotChangeClients()
     {
         var key = TestCacheKey.New();
         var client = new InMemoryKeyClient(key, 1, true);
 
         var cache = new Mock<IKeyClientCache<InMemoryKeyClient, byte[]>>(MockBehavior.Strict);
-        cache.Setup(c => c.SetClientsAsync(key, It.IsAny<IReadOnlyList<InMemoryKeyClient>>(), CancellationToken.None))
-            .Returns(Task.CompletedTask);
         cache.Setup(c => c.GetAllClientsAsync(key, CancellationToken.None)).ReturnsAsync([client]);
         cache.Setup(c => c.GetCurrentClientAsync(key, CancellationToken.None)).ReturnsAsync(client);
 
@@ -218,7 +242,7 @@ public class InMemoryKeyProviderTests
         // Verify that ReloadKeysAsync doesn't call any cache methods (it's a no-op)
         cache.Verify(
             c => c.SetClientsAsync(It.IsAny<string>(), It.IsAny<IReadOnlyList<InMemoryKeyClient>>(),
-                It.IsAny<CancellationToken>()), Times.Once); // Only from PreloadKeysAsync
+                It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -388,5 +412,43 @@ public class InMemoryKeyProviderTests
 
         signature.Should().Equal(expectedSignature);
         signature.Length.Should().Be(32);
+    }
+
+    [Fact]
+    public async Task Wrap_Then_Unwrap_Roundtrip_With_Real_HybridCache()
+    {
+        using var cacheFixture = new HybridCacheFixtureInMemory();
+        var cache = new KeyClientCache<InMemoryKeyClient, byte[]>(cacheFixture.Cache, new CacheKeyGenerator());
+        var provider = new InMemoryKeyProvider(cache);
+        var key = TestCacheKey.New();
+        var dek = RandomNumberGenerator.GetBytes(32);
+
+        await provider.PreloadKeysAsync(key);
+        var wrapped = await provider.WrapKeyAsync(dek, key);
+        var roundtrip = await provider.UnwrapKeyAsync(wrapped.WrappedDek, key, wrapped.KekKeyId);
+
+        roundtrip.Should().Equal(dek);
+    }
+
+    [Fact]
+    public async Task Wrap_Then_Unwrap_Roundtrip_With_DistributedMemoryHybridCache()
+    {
+        var services = new ServiceCollection();
+        services.AddOptions();
+        services.AddDistributedMemoryCache();
+        services.AddHybridCache();
+
+        await using var serviceProvider = services.BuildServiceProvider();
+        var hybridCache = serviceProvider.GetRequiredService<Microsoft.Extensions.Caching.Hybrid.HybridCache>();
+        var cache = new KeyClientCache<InMemoryKeyClient, byte[]>(hybridCache, new CacheKeyGenerator());
+        var provider = new InMemoryKeyProvider(cache);
+        var key = TestCacheKey.New();
+        var dek = RandomNumberGenerator.GetBytes(32);
+
+        await provider.PreloadKeysAsync(key);
+        var wrapped = await provider.WrapKeyAsync(dek, key);
+        var roundtrip = await provider.UnwrapKeyAsync(wrapped.WrappedDek, key, wrapped.KekKeyId);
+
+        roundtrip.Should().Equal(dek);
     }
 }

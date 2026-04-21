@@ -1,5 +1,8 @@
 using FluentAssertions;
 using Tokenization.Domain.Abstractions;
+using Tokenization.Infrastructure.Caching;
+using Tokenization.Infrastructure.Crypto.Caching;
+using Tokenization.Infrastructure.Crypto.InMemory;
 using Tokenization.Infrastructure.Db.BlindIndex;
 using Tokenization.Tests.Shared.Fixtures;
 using Xunit;
@@ -7,19 +10,20 @@ using Xunit;
 namespace Tokenization.Tests.Integration.Db.BlindIndex;
 
 /// <summary>
-/// Integration tests for BlindIndexService with real KeyVaultProvider to ensure proper HMAC computation
-/// and database integration with shadow properties.
+/// Integration tests for BlindIndexService using the default in-memory key provider.
+/// This keeps the standard integration suite runnable without Azure dependencies.
 /// </summary>
-public class BlindIndexKeyVaultIntegrationTests(KeyVaultFixture keyVaultFixture)
-    : IClassFixture<KeyVaultFixture>, IClassFixture<SqlServerFixture>
+public class BlindIndexIntegrationTests
 {
     [Fact]
-    public async Task BlindIndexService_WithKeyVaultProvider_ComputesConsistentHashes()
+    public async Task BlindIndexService_WithInMemoryProvider_ComputesConsistentHashes()
     {
         // Arrange
-        var keyVaultProvider = keyVaultFixture.GetKeyVaultProvider<IKeyProvider>();
-        await keyVaultProvider.PreloadKeysAsync(keyVaultFixture.BlindIndexKeyName!);
-        var blindIndexService = new BlindIndexService(keyVaultProvider, keyVaultFixture.BlindIndexKeyName!);
+        using var cacheFixture = new HybridCacheFixtureInMemory();
+        var keyProvider = CreateKeyProvider(cacheFixture);
+        const string blindIndexKeyName = "blind-index-main";
+        await keyProvider.PreloadKeysAsync(blindIndexKeyName);
+        var blindIndexService = new BlindIndexService(keyProvider, blindIndexKeyName);
 
         // Act
         var hash1 = await blindIndexService.ComputeAsync("tenant-123", "v1");
@@ -35,9 +39,11 @@ public class BlindIndexKeyVaultIntegrationTests(KeyVaultFixture keyVaultFixture)
     public async Task BlindIndexService_WithDifferentValues_ProducesDifferentHashes()
     {
         // Arrange
-        var keyVaultProvider = keyVaultFixture.GetKeyVaultProvider<IKeyProvider>();
-        await keyVaultProvider.PreloadKeysAsync(keyVaultFixture.BlindIndexKeyName!);
-        var blindIndexService = new BlindIndexService(keyVaultProvider, keyVaultFixture.BlindIndexKeyName!);
+        using var cacheFixture = new HybridCacheFixtureInMemory();
+        var keyProvider = CreateKeyProvider(cacheFixture);
+        const string blindIndexKeyName = "blind-index-main";
+        await keyProvider.PreloadKeysAsync(blindIndexKeyName);
+        var blindIndexService = new BlindIndexService(keyProvider, blindIndexKeyName);
 
         // Act
         var hash1 = await blindIndexService.ComputeAsync("tenant-123", "v1");
@@ -45,5 +51,14 @@ public class BlindIndexKeyVaultIntegrationTests(KeyVaultFixture keyVaultFixture)
 
         // Assert
         hash1.Should().NotBeEquivalentTo(hash2); // Different tenant IDs should produce different hashes
+    }
+
+    private static IKeyProvider CreateKeyProvider(HybridCacheFixtureInMemory cacheFixture)
+    {
+        var cache = new KeyClientCache<InMemoryKeyClient, byte[]>(
+            cacheFixture.Cache,
+            new CacheKeyGenerator());
+
+        return new InMemoryKeyProvider(cache);
     }
 }

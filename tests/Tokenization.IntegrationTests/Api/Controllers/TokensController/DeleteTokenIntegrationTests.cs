@@ -9,7 +9,6 @@ using Xunit;
 
 namespace Tokenization.Tests.Integration.Api.Controllers.TokensController;
 
-[Collection("IntegrationTests")]
 public class DeleteTokenIntegrationTests(WebApplicationFactoryFixture factory)
     : IClassFixture<WebApplicationFactoryFixture>
 {

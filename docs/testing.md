@@ -5,7 +5,7 @@
 - `tests/Tokenization.UnitTests`
   Fast tests for controllers, middleware, handlers, services, mappers, and infrastructure units.
 - `tests/Tokenization.IntegrationTests`
-  End-to-end and infrastructure-heavy tests backed by Testcontainers.
+  A mixed suite: fast API-host integration tests plus Docker-backed infrastructure tests.
 - `tests/TestCommon`
   Shared fixtures and test helpers used by both suites.
 
@@ -31,7 +31,11 @@ dotnet build TokenizationService.sln
 
 ## Docker Requirements
 
-The integration project uses Testcontainers for SQL Server and Redis. Docker must be running before you execute the integration suite.
+The API controller integration tests use an in-memory SQLite database so they stay fast in the local development loop.
+
+The infrastructure-focused integration tests still use Testcontainers for SQL Server and Redis. Docker must be running before you execute those parts of the suite.
+
+When the local development SQL Server from `docker compose up -d` is already available on `localhost,14333`, the SQL-backed fixtures will reuse it instead of cold-starting a fresh SQL container. If that local dependency is not available, the fixtures fall back to Testcontainers automatically.
 
 Typical local flow:
 
@@ -45,6 +49,8 @@ If Docker is unavailable, the integration fixtures surface a clear message expla
 ## Key Vault Tests
 
 Azure Key Vault integration tests are opt-in.
+
+The default integration suite uses the in-memory key provider for its crypto-dependent coverage so it can run on any machine with Docker. Only the tests under the dedicated Key Vault path require Azure access.
 
 Before running them:
 

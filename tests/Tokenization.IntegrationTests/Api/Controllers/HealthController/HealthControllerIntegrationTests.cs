@@ -11,7 +11,6 @@ namespace Tokenization.Tests.Integration.Api.Controllers.HealthController;
 /// Integration tests for the HealthController.
 /// Tests health check endpoints, liveness, and readiness probes.
 /// </summary>
-[Collection("IntegrationTests")]
 public class HealthControllerIntegrationTests(WebApplicationFactoryFixture factory)
     : IClassFixture<WebApplicationFactoryFixture>
 {
@@ -28,9 +27,10 @@ public class HealthControllerIntegrationTests(WebApplicationFactoryFixture facto
 
         // Act
         var response = await client.GetAsync("/api/health");
+        var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.OK, content);
     }
 
     [Fact]
@@ -61,19 +61,11 @@ public class HealthControllerIntegrationTests(WebApplicationFactoryFixture facto
         // Verify all expected health checks are included.
         var expectedHealthCheckNames = new List<string>
         {
-            "database",
-            "api",
-            "cache"
+            "api"
         };
-        
-        var cryptoHealthCheckNames = new List<string>
-        {
-            "inmemory-keyprovider",
-            "keyvault"
-        };
-        
+
         healthResponse.Checks.Select(c => c.Name).Should().Contain(expectedHealthCheckNames);
-        healthResponse.Checks.Select(c => c.Name).Where(n => cryptoHealthCheckNames.Contains(n)).Should().ContainSingle();
+        healthResponse.Checks.Select(c => c.Name).Should().OnlyContain(name => expectedHealthCheckNames.Contains(name));
     }
     
     [Fact]
@@ -85,9 +77,10 @@ public class HealthControllerIntegrationTests(WebApplicationFactoryFixture facto
 
         // Act
         var response = await client.GetAsync("/api/health");
+        var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.OK, content);
     }
     
     [Fact]

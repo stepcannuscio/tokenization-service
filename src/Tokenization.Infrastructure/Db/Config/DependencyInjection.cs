@@ -5,10 +5,12 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Tokenization.Domain.Abstractions;
 using Tokenization.Infrastructure.Config.Options;
 using Tokenization.Infrastructure.Db.BlindIndex;
 using Tokenization.Infrastructure.Db.Config.Options;
+using Tokenization.Infrastructure.Db.Enums;
 using Tokenization.Infrastructure.Db.Health.Config;
 using Tokenization.Infrastructure.Db.Interceptors;
 using Tokenization.Infrastructure.Db.Repositories;
@@ -38,25 +40,35 @@ internal static class DependencyInjection
         services.AddScoped<ITokenRecordRepository, TokenRecordRepository>();
         services.AddScoped<BulkOperationsService>();
 
-        var dbOptions = config.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>() 
-                       ?? throw new InvalidOperationException("Database configuration is required");
-
-        var connectionString = BuildResilientConnectionString(dbOptions);
-
         services.AddDbContext<TokensDbContext>((sp, options) =>
             {
+                var dbOptions = sp.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+
                 options.EnableSensitiveDataLogging(false);
                 options.EnableDetailedErrors(false);
 
-                options.UseSqlServer(connectionString, sqlOptions =>
+                switch (dbOptions.Provider)
                 {
-                    sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: dbOptions.MaxRetryCount,
-                        maxRetryDelay: TimeSpan.FromSeconds(dbOptions.MaxRetryDelaySeconds),
-                        errorNumbersToAdd: null);
+                    case DatabaseProviderType.SqlServer:
+                    {
+                        var connectionString = BuildResilientConnectionString(dbOptions);
+                        options.UseSqlServer(connectionString, sqlOptions =>
+                        {
+                            sqlOptions.EnableRetryOnFailure(
+                                maxRetryCount: dbOptions.MaxRetryCount,
+                                maxRetryDelay: TimeSpan.FromSeconds(dbOptions.MaxRetryDelaySeconds),
+                                errorNumbersToAdd: null);
 
-                    sqlOptions.CommandTimeout(dbOptions.CommandTimeoutSeconds);
-                });
+                            sqlOptions.CommandTimeout(dbOptions.CommandTimeoutSeconds);
+                        });
+                        break;
+                    }
+                    case DatabaseProviderType.Sqlite:
+                        options.UseSqlite(dbOptions.ConnectionString);
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unsupported database provider: {dbOptions.Provider}");
+                }
 
                 options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
                 options.AddInterceptors(sp.GetServices<DbCommandInterceptor>());

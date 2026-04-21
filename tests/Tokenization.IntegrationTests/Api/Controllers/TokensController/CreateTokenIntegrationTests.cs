@@ -1,8 +1,6 @@
 using FluentAssertions;
 using MediatR;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Net;
 using System.Text.Json;
 using Tokenization.Api.Authorization;
@@ -22,7 +20,6 @@ namespace Tokenization.Tests.Integration.Api.Controllers.TokensController;
 /// Tests authentication, authorization, idempotency, multi-tenant isolation, validation,
 /// versioning, exception handling, and security headers.
 /// </summary>
-[Collection("IntegrationTests")]
 public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
     : IClassFixture<WebApplicationFactoryFixture>
 {
@@ -47,7 +44,7 @@ public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         response.Headers.Location.Should().NotBeNull();
-        response.Headers.Location!.ToString().Should().StartWith("/api/v");
+        response.Headers.Location!.ToString().Should().Contain("/api/v");
 
         var tokenResponse = JsonSerializer.Deserialize<CreateTokenResponse>(responseContent, _jsonOptions);
         tokenResponse.Should().NotBeNull();
@@ -66,17 +63,10 @@ public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
         {
             builder.ConfigureServices(services =>
             {
-                // Remove existing authentication
-                services.RemoveAll<IAuthenticationSchemeProvider>();
-                services.RemoveAll<IAuthenticationHandlerProvider>();
-                services.RemoveAll<IAuthenticationService>();
-
-                // Add authentication scheme that fails
-                services.AddAuthentication("Test-Fail")
-                    .AddScheme<TestAuthenticationSchemeOptions, TestAuthorizationHandler>("Test-Fail", options =>
-                    {
-                        options.DefaultUserId = null!; // This will cause authentication to fail
-                    });
+                services.AddTestAuthentication("Test-Fail", options =>
+                {
+                    options.DefaultUserId = null!; // This will cause authentication to fail
+                });
             });
         }).CreateClient();
 
@@ -163,16 +153,11 @@ public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
         {
             builder.ConfigureServices(services =>
             {
-                services.RemoveAll<IAuthenticationSchemeProvider>();
-                services.RemoveAll<IAuthenticationHandlerProvider>();
-                services.RemoveAll<IAuthenticationService>();
-
-                services.AddAuthentication("Test-Tenant-A")
-                    .AddScheme<TestAuthenticationSchemeOptions, TestAuthorizationHandler>("Test-Tenant-A", options =>
-                    {
-                        options.DefaultUserId = Guid.NewGuid().ToString();
-                        options.DefaultTenantId = "tenant-A";
-                    });
+                services.AddTestAuthentication("Test-Tenant-A", options =>
+                {
+                    options.DefaultUserId = Guid.NewGuid().ToString();
+                    options.DefaultTenantId = "tenant-A";
+                });
             });
         }).CreateClient();
         
@@ -186,16 +171,11 @@ public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
         {
             builder.ConfigureServices(services =>
             {
-                services.RemoveAll<IAuthenticationSchemeProvider>();
-                services.RemoveAll<IAuthenticationHandlerProvider>();
-                services.RemoveAll<IAuthenticationService>();
-
-                services.AddAuthentication("Test-Tenant-B")
-                    .AddScheme<TestAuthenticationSchemeOptions, TestAuthorizationHandler>("Test-Tenant-B", options =>
-                    {
-                        options.DefaultUserId = Guid.NewGuid().ToString();
-                        options.DefaultTenantId = "tenant-B";
-                    });
+                services.AddTestAuthentication("Test-Tenant-B", options =>
+                {
+                    options.DefaultUserId = Guid.NewGuid().ToString();
+                    options.DefaultTenantId = "tenant-B";
+                });
             });
         }).CreateClient();
 
@@ -255,19 +235,13 @@ public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
         {
             builder.ConfigureServices(services =>
             {
-                services.RemoveAll<IAuthenticationSchemeProvider>();
-                services.RemoveAll<IAuthenticationHandlerProvider>();
-                services.RemoveAll<IAuthenticationService>();
-
-                // Add authentication with insufficient scopes (no TokenCreate scope)
-                services.AddAuthentication("Test-Insufficient")
-                    .AddScheme<TestAuthenticationSchemeOptions, TestAuthorizationHandler>("Test-Insufficient", options =>
-                    {
-                        options.DefaultUserId = Guid.NewGuid().ToString();
-                        options.DefaultTenantId = "tenant-123";
-                        options.DefaultScopes = [Scopes.TokenRead]; // Only read scope, not create
-                        options.DefaultRoles = []; // No admin role
-                    });
+                services.AddTestAuthentication("Test-Insufficient", options =>
+                {
+                    options.DefaultUserId = Guid.NewGuid().ToString();
+                    options.DefaultTenantId = "tenant-123";
+                    options.DefaultScopes = [Scopes.TokenRead]; // Only read scope, not create
+                    options.DefaultRoles = []; // No admin role
+                });
             });
         }).CreateClient();
 

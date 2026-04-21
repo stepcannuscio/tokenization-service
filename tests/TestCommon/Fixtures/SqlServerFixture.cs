@@ -16,6 +16,7 @@ namespace Tokenization.Tests.Shared.Fixtures;
 public sealed class SqlServerFixture : IAsyncLifetime
 {
     private MsSqlContainer? _container;
+    private bool _reuseContainer;
     private string _connectionStr = string.Empty;
     private string _testDbName = string.Empty;
     private IBlindIndexService? _blindIndexService;
@@ -24,9 +25,26 @@ public sealed class SqlServerFixture : IAsyncLifetime
     {
         try
         {
-            _container = new MsSqlBuilder().Build();
-            await _container.StartAsync();
-            _connectionStr = _container.GetConnectionString();
+            var localConnectionString = await SqlServerTestDependency.TryGetLocalComposeConnectionStringAsync();
+            if (!string.IsNullOrEmpty(localConnectionString))
+            {
+                _connectionStr = localConnectionString;
+            }
+            else
+            {
+                _reuseContainer = SqlServerTestDependency.ShouldReuseContainers();
+                var builder = new MsSqlBuilder()
+                    .WithReuse(_reuseContainer);
+
+                if (!_reuseContainer)
+                {
+                    builder = builder.WithName($"tokenization-sqlserver-{Guid.NewGuid():N}");
+                }
+
+                _container = builder.Build();
+                await _container.StartAsync();
+                _connectionStr = _container.GetConnectionString();
+            }
         }
         catch (DockerUnavailableException)
         {
@@ -79,7 +97,7 @@ public sealed class SqlServerFixture : IAsyncLifetime
             await cmd.ExecuteNonQueryAsync();
         }
 
-        if (_container is not null)
+        if (_container is not null && !_reuseContainer)
         {
             await _container.StopAsync();
             await _container.DisposeAsync();
@@ -109,7 +127,7 @@ public sealed class SqlServerFixture : IAsyncLifetime
         // Clean up any existing data before the test starts
         await CleanupTestDataAsync(ctx);
 
-        return new DbScope(ctx, _blindIndexService!);
+        return new DbScope(ctx, _blindIndexService!, testConnectionString);
     }
     
     internal static async Task CleanupTestDataAsync(TokensDbContext context)
@@ -150,9 +168,10 @@ internal sealed class DbScope : IAsyncDisposable
 {
     public TokensDbContext Context { get; }
     public IBlindIndexService Blind { get; }
+    public string ConnectionString { get; }
 
-    internal DbScope(TokensDbContext ctx, IBlindIndexService blind)
-        => (Context, Blind) = (ctx, blind);
+    internal DbScope(TokensDbContext ctx, IBlindIndexService blind, string connectionString)
+        => (Context, Blind, ConnectionString) = (ctx, blind, connectionString);
 
     public async ValueTask DisposeAsync()
     {

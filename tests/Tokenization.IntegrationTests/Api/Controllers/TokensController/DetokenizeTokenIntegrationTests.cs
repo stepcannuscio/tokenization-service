@@ -9,7 +9,6 @@ using Xunit;
 
 namespace Tokenization.Tests.Integration.Api.Controllers.TokensController;
 
-[Collection("IntegrationTests")]
 public class DetokenizeTokenIntegrationTests(WebApplicationFactoryFixture factory)
     : IClassFixture<WebApplicationFactoryFixture>
 {
@@ -27,6 +26,7 @@ public class DetokenizeTokenIntegrationTests(WebApplicationFactoryFixture factor
         client.DefaultRequestHeaders.Add(IdempotencyHeaders.IdempotencyKey, Guid.NewGuid().ToString());
         
         var createResponse = await client.PostAsJsonAsync("/api/v1/tokens", createRequest);
+        createResponse.StatusCode.Should().Be(HttpStatusCode.Created, "token must be created successfully before detokenizing");
         var createdToken = JsonSerializer.Deserialize<CreateTokenResponse>(
             await createResponse.Content.ReadAsStringAsync(), _jsonOptions);
 
@@ -35,7 +35,7 @@ public class DetokenizeTokenIntegrationTests(WebApplicationFactoryFixture factor
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.OK, content);
         var detokenizeResponse = JsonSerializer.Deserialize<DetokenizeTokenResponse>(content, _jsonOptions);
         detokenizeResponse.Should().NotBeNull();
         detokenizeResponse.Pan.Should().Be(createRequest.Pan);
