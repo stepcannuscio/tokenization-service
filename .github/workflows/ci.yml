@@ -55,7 +55,7 @@ jobs:
 
       - name: Publish coverage summary
         run: |
-          cat TestResults/unit/coverage-report/Summary.md >> "$GITHUB_STEP_SUMMARY"
+          cat TestResults/unit/coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
           cat TestResults/unit/coverage-report/Summary.txt
 
       - name: Upload unit test artifacts
