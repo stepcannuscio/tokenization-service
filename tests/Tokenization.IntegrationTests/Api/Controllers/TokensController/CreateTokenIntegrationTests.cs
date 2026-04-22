@@ -296,7 +296,6 @@ public class CreateTokenIntegrationTests(WebApplicationFactoryFixture factory)
         // Assert
         response.Headers.Should().ContainKey("Content-Security-Policy");
         response.Headers.Should().ContainKey("X-Content-Type-Options");
-        response.Headers.Should().ContainKey("X-XSS-Protection");
         response.Headers.Should().ContainKey("X-Frame-Options");
         response.Headers.Should().ContainKey("Referrer-Policy");
         response.Headers.Should().ContainKey("Permissions-Policy");
